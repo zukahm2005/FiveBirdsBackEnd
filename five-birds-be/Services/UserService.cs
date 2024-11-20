@@ -1,4 +1,3 @@
-using System.IdentityModel.Tokens.Jwt;
 using five_birds_be.Data;
 using five_birds_be.Dto;
 using five_birds_be.DTO.Request;
@@ -59,7 +58,7 @@ namespace five_birds_be.Services
                 UserName = user.UserName,
                 Email = user.Email,
                 Create_at = user.Create_at,
-                Update_at = user.Create_at
+                Update_at = user.Update_at,
             };
 
             return ApiResponse<UserResponseDTO>.Success(200, responseUserDTO, "User registered successfully");
