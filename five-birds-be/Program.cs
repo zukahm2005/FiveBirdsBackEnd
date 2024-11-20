@@ -49,6 +49,7 @@ builder.Services.AddCors(options =>
 builder.WebHost.UseUrls("http://localhost:5005");
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<JwtService>(); 
+builder.Services.AddScoped<EmailService>();
 builder.Services.AddHttpContextAccessor();
 
 

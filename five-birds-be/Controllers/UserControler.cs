@@ -48,6 +48,8 @@ namespace five_birds_be.Controllers
 
             if (data.ErrorCode == 404) return NotFound(data);
 
+            if (data.ErrorCode == 400) return BadRequest(data);
+
             return Ok(data);
         }
 
@@ -74,6 +76,16 @@ namespace five_birds_be.Controllers
         public async Task<IActionResult> GetUserById()
         {
             var data = await _userService.GetUserById();
+
+            return Ok(data);
+        }
+
+        [HttpPost("forgot")]
+        public async Task<IActionResult> ForgotPassword([FromBody]ForgotPasswordRequest request)
+        {
+            var data = await _userService.ForgotPassword(request.Email);
+
+            if (data.ErrorCode == 404) return NotFound(data);
 
             return Ok(data);
         }
