@@ -35,38 +35,52 @@ namespace five_birds_be.Services
                 .ToListAsync();
         }
 
-        public async Task<ApiResponse<UserResponseDTO>> Register(UserDTO userDTO)
+        public async Task<ApiResponse<string>> Register(UserDTO userDTO)
         {
-            var username = await _dataContext.Users
-                .FirstOrDefaultAsync(u => u.UserName == userDTO.UserName);
-            if (username != null) return ApiResponse<UserResponseDTO>.Failure(400, "UserName already exists");
+            // Kiểm tra nếu email đã tồn tại
+            var existingUser = await _dataContext.Users.FirstOrDefaultAsync(u => u.Email == userDTO.Email);
+            if (existingUser != null)
+            {
+                return ApiResponse<string>.Failure(400, "Email đã được sử dụng.");
+            }
 
-            var email = await _dataContext.Users
-             .FirstOrDefaultAsync(u => u.Email == userDTO.Email);
-            if (email != null) return ApiResponse<UserResponseDTO>.Failure(400, "Email already exists");
-
-            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(userDTO.Password);
-
+            // Tạo người dùng mới
             var user = new User
             {
                 UserName = userDTO.UserName,
                 Email = userDTO.Email,
-                Password = hashedPassword,
+                Password = BCrypt.Net.BCrypt.HashPassword(userDTO.Password),
+                Create_at = DateTime.UtcNow
             };
 
-            var users = await _dataContext.Users.AddAsync(user);
+            await _dataContext.Users.AddAsync(user);
             await _dataContext.SaveChangesAsync();
 
-            var responseUserDTO = new UserResponseDTO
-            {
-                UserName = user.UserName,
-                Email = user.Email,
-                Create_at = user.Create_at,
-                Update_at = user.Update_at,
-            };
+            // Gửi email xác nhận
+            var subject = "Đăng ký tài khoản thành công";
+           var body = $@"
+                    <html>
+                        <body>
+                            <p>Hello <strong>{userDTO.UserName}</strong>,</p>
 
+                            <p>Congratulations on successfully registering an account with our system.</p>
+                            
+                            <p><strong>Your account details:</strong></p>
+                            <ul>
+                                <li>Email: {userDTO.Email}</li>
+                            </ul>
+                            
+                            <p>Thank you for using our services.</p>
+                            
+                            <p>Best regards,</p>
+                            <p><em>The Support Team</em></p>
+                        </body>
+                    </html>
+                ";
 
-            return ApiResponse<UserResponseDTO>.Success(200, responseUserDTO, "User registered successfully");
+            await _emailService.SendEmailAsync(userDTO.Email, subject, body);
+
+            return ApiResponse<string>.Success(200, null, "Tài khoản đã được tạo thành công và email xác nhận đã được gửi.");
         }
 
         public async Task<ApiResponse<UserResponseDTO>> UpdateUser(UserDTO userDTO)
