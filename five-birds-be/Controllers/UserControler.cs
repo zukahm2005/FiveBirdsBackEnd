@@ -66,10 +66,25 @@ namespace five_birds_be.Controllers
         }
 
         [HttpPost("logout")]
-        public async Task<IActionResult> Logout()
+        public IActionResult Logout()
         {
-            Response.Cookies.Delete("token");
-            return Ok(new { message = "Logged out successfully." });
+            try
+            {
+                // Xóa cookie bằng cách set thời gian hết hạn trong quá khứ
+                Response.Cookies.Append("token", "", new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = true, // Chỉ hoạt động trên HTTPS
+                    SameSite = SameSiteMode.Strict,
+                    Expires = DateTime.UtcNow.AddDays(-1) // Set thời gian hết hạn trong quá khứ
+                });
+
+                return Ok(new { message = "Logged out successfully." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Lỗi khi logout", error = ex.Message });
+            }
         }
 
         [HttpGet]
@@ -84,42 +99,49 @@ namespace five_birds_be.Controllers
         [HttpPost("forgot")]
         public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
         {
-            var data = await _userService.ForgotPassword(request.Email);
+            var data = await _userService.ForgotPassword(request);
 
             if (data.ErrorCode == 404) return NotFound(data);
 
             return Ok(data);
         }
-        [HttpGet("checktoken")]
-        public async Task<IActionResult> CheckToken()
+
+       [HttpGet("checktoken")]
+        public IActionResult CheckToken()
         {
             try
             {
+                // Lấy token từ cookie
                 string? token = Request.Cookies["token"];
-
                 if (string.IsNullOrEmpty(token))
                 {
-                    return BadRequest(new { message = "Token không tồn tại trong cookie." });
+                    return Ok(new { isLoggedIn = false, message = "Chưa đăng nhập." });
                 }
 
+                // Giải mã token để kiểm tra
                 var handler = new JwtSecurityTokenHandler();
-                var claims = handler.ReadJwtToken(token).Claims;
-
-                var resultList = claims.Select(c => new
+                try
                 {
-                    Type = c.Type,
-                    Value = c.Value
-                }).ToList();
+                    var claims = handler.ReadJwtToken(token).Claims;
 
-                return Ok(resultList);
+                    var resultList = claims.Select(c => new
+                    {
+                        Type = c.Type,
+                        Value = c.Value
+                    }).ToList();
+
+                    return Ok(new { isLoggedIn = true, claims = resultList, message = "Đã đăng nhập." });
+                }
+                catch
+                {
+                    return BadRequest(new { isLoggedIn = false, message = "Token không hợp lệ." });
+                }
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Lỗi khi kiểm tra token", error = ex.Message });
+                return StatusCode(500, new { isLoggedIn = false, message = "Lỗi khi kiểm tra token.", error = ex.Message });
             }
         }
-
-        
 
     }
 }

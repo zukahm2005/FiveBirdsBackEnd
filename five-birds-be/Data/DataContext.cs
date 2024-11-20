@@ -8,6 +8,7 @@ namespace five_birds_be.Data
         public DataContext(DbContextOptions<DataContext> options) : base(options) { }
 
         public DbSet<User> Users { get; set; }
+        public DbSet<OtpRecord> OtpRecords { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

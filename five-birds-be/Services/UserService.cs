@@ -15,13 +15,13 @@ namespace five_birds_be.Services
         private DataContext _dataContext;
         private JwtService _jservice;
         private IHttpContextAccessor _httpContextAccessor;
-        private EmailService _userService;
+        private EmailService _emailService;
         public UserService(DataContext dataContext, JwtService jservice, IHttpContextAccessor httpContextAccessor, EmailService emailService)
         {
             _dataContext = dataContext;
             _jservice = jservice;
             _httpContextAccessor = httpContextAccessor;
-            _userService = emailService;
+            _emailService = emailService;
 
         }
 
@@ -65,6 +65,7 @@ namespace five_birds_be.Services
                 Update_at = user.Update_at,
             };
 
+
             return ApiResponse<UserResponseDTO>.Success(200, responseUserDTO, "User registered successfully");
         }
 
@@ -83,7 +84,7 @@ namespace five_birds_be.Services
                 if (userDTO.NewPassword.Length < 6)
                     return ApiResponse<UserResponseDTO>.Failure(400, "Password must be at least 6 characters long");
 
-                user.Password = BCrypt.Net.BCrypt.HashPassword(userDTO.NewPassword); 
+                user.Password = BCrypt.Net.BCrypt.HashPassword(userDTO.NewPassword);
             }
 
             user.UserName = userDTO.UserName;
@@ -137,9 +138,9 @@ namespace five_birds_be.Services
             return ApiResponse<int>.Success(200, userId.Value, "get User id success");
         }
 
-        public async Task<ApiResponse<string>> ForgotPassword(string email)
+        public async Task<ApiResponse<string>> ForgotPassword(ForgotPasswordRequest request)
         {
-            var user = await _dataContext.Users.FirstOrDefaultAsync(u => u.Email == email);
+            var user = await _dataContext.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
 
             if (user == null) return ApiResponse<string>.Failure(404, "Email does not exist.");
 
@@ -154,7 +155,7 @@ namespace five_birds_be.Services
             var subject = "New Password";
             var body = $"Your new password is: {newPassword}";
 
-            await _userService.SendEmailAsync(email, subject, body);
+            await _emailService.SendEmailAsync(request.Email, subject, body);
 
             return ApiResponse<string>.Success(200, null, "A new password has been emailed to you.");
         }
