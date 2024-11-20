@@ -39,7 +39,7 @@ builder.Services.AddAuthentication("Bearer")
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactClient",
-        policy => policy.WithOrigins("http://localhost:3000")
+        policy => policy.WithOrigins("http://localhost:5173")
                         .AllowAnyHeader()
                         .AllowAnyMethod());
 });
