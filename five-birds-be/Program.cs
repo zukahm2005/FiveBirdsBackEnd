@@ -38,13 +38,14 @@ builder.Services.AddAuthentication("Bearer")
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAngularClient",
-        policy => policy.WithOrigins("http://localhost:4200")
+    options.AddPolicy("AllowReactClient",
+        policy => policy.WithOrigins("http://localhost:3000")
                         .AllowAnyHeader()
                         .AllowAnyMethod());
 });
 
 
+builder.WebHost.UseUrls("http://localhost:5005");
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<JwtService>(); 
 builder.Services.AddHttpContextAccessor();
@@ -70,7 +71,7 @@ app.UseSwaggerUI(c =>
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "API Documentation V1");
     c.RoutePrefix = string.Empty; 
 });
-app.UseCors("AllowAngularClient");
+app.UseCors("AllowReactClient");
 app.UseHttpsRedirection();
 app.MapControllers();
 app.Run();

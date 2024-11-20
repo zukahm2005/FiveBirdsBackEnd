@@ -11,7 +11,7 @@ namespace five_birds_be.Data
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
-           
+        
         }
     }
 
