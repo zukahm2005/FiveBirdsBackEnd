@@ -11,7 +11,7 @@ using five_birds_be.Data;
 namespace five_birds_be.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20241120081728_InitialCreate")]
+    [Migration("20241120092023_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -28,6 +28,9 @@ namespace five_birds_be.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
+                    b.Property<DateTime>("Create_at")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -39,15 +42,12 @@ namespace five_birds_be.Migrations
                     b.Property<int>("Role")
                         .HasColumnType("int");
 
+                    b.Property<DateTime>("Update_at")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<string>("UserName")
                         .IsRequired()
                         .HasColumnType("longtext");
-
-                    b.Property<DateTime>("create_at")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateTime>("update_at")
-                        .HasColumnType("datetime(6)");
 
                     b.HasKey("UserId");
 
