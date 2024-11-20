@@ -1,6 +1,13 @@
-namespace five_birds_be.DTO.Request{
-    public class UserLoginDTO{
+using System.ComponentModel.DataAnnotations;
+
+namespace five_birds_be.DTO.Request
+{
+    public class UserLoginDTO
+    {
+        [Required(ErrorMessage = "UserName is required")]
         public string UserName { get; set; }
+
+        [Required(ErrorMessage = "Password is required")]
         public string Password { get; set; }
     }
 }

@@ -47,7 +47,7 @@ namespace five_birds_be.Services
 
             var email = await _dataContext.Users
              .FirstOrDefaultAsync(u => u.Email == userDTO.Email);
-             if (email != null) return ApiResponse<UserResponseDTO>.Failure(400, "Email already exists");
+            if (email != null) return ApiResponse<UserResponseDTO>.Failure(400, "Email already exists");
 
             var hashedPassword = BCrypt.Net.BCrypt.HashPassword(userDTO.Password);
 
@@ -65,60 +65,69 @@ namespace five_birds_be.Services
             {
                 UserName = user.UserName,
                 Email = user.Email,
+                Create_at = user.Create_at,
+                Update_at = user.Create_at
             };
 
             return ApiResponse<UserResponseDTO>.Success(200, responseUserDTO, "User registered successfully");
         }
 
-        public async Task<User> UpdataUser(int id, UserDTO userDTO)
+        public async Task<ApiResponse<UserResponseDTO>> UpdataUser(UserDTO userDTO)
         {
-            var user = await _dataContext.Users.FindAsync(id);
+            var userId = _jservice.GetUserIdFromHttpContext();
+            var user = await _dataContext.Users.FindAsync(userId);
             if (user == null)
             {
-
-                throw new KeyNotFoundException($"User with ID {id} not found.");
+                return ApiResponse<UserResponseDTO>.Failure(404, " UserId NotFound");
             }
             user.UserName = userDTO.UserName;
-            user.Password = userDTO.Password;
+            user.Password = BCrypt.Net.BCrypt.HashPassword(userDTO.Password);
             user.Email = userDTO.Email;
+            user.Create_at = user.Create_at;
+            user.Update_at = DateTime.Now; 
+
+            var userResponseDTO = new UserResponseDTO
+            {
+                UserName = user.UserName,
+                Email = user.Email,
+                Create_at = user.Create_at,
+                Update_at = user.Update_at,
+            };
 
             await _dataContext.SaveChangesAsync();
-            return user;
+            return ApiResponse<UserResponseDTO>.Success(200, userResponseDTO, "Updata user success");
         }
-        public async Task<IActionResult> DeleteUser(int id)
+
+        public async Task<ApiResponse<string>> DeleteUser()
         {
-            // Tìm User trong database
-            var user = await _dataContext.Users.FindAsync(id);
+            var userId = _jservice.GetUserIdFromHttpContext();
+            var user = await _dataContext.Users.FindAsync(userId);
 
             if (user == null)
             {
-                return new NotFoundObjectResult(new { message = $"User with ID {id} not found." });
+                return ApiResponse<string>.Failure(404, " UserId NotFound");
             }
             _dataContext.Users.Remove(user);
 
             await _dataContext.SaveChangesAsync();
 
-            return new OkObjectResult(new { message = $"User with ID {id} deleted successfully." });
+            return ApiResponse<string>.Success(204, "Delete User Succuss");
         }
         public async Task<ApiResponse<string>> Login(UserLoginDTO userDTO)
         {
-            if (userDTO == null || string.IsNullOrEmpty(userDTO.UserName) || string.IsNullOrEmpty(userDTO.Password))
-            {
-                return ApiResponse<string>.Failure(404, "No users found");
-            }
-
-            var user = await _dataContext.Users.FirstOrDefaultAsync(u => u.UserName == userDTO.UserName);
+            var user = await _dataContext.Users
+            .FirstOrDefaultAsync(u => u.UserName == userDTO.UserName);
 
             if (user == null)
             {
-                return ApiResponse<string>.Failure(404, "Incorrect username or password");
+                return ApiResponse<string>.Failure(400, "Incorrect username or password");
             }
 
             var passwordMatch = BCrypt.Net.BCrypt.Verify(userDTO.Password, user.Password);
 
             if (!passwordMatch)
             {
-                return ApiResponse<string>.Failure(404, "Incorrect username or password");
+                return ApiResponse<string>.Failure(400, "Incorrect username or password");
             }
 
             var token = _jservice.GenerateJwtToken(user);

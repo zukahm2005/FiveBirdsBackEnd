@@ -20,15 +20,15 @@ Project ATM Bank
  dotnet add package Microsoft.AspNetCore.Authentication.JwtBearerdot
 
 
- http://localhost:5056/api/v1/users lấy userId
+ http://localhost:5005/api/v1/users lấy userId
 
- http://localhost:5056/api/v1/users/login 
+ http://localhost:5005/api/v1/users/login 
 
- http://localhost:5056/api/v1/users/register
+ http://localhost:5005/api/v1/users/register
 
- http://localhost:5056/api/v1/users/all
+ http://localhost:5005/api/v1/users/all
 
- http://localhost:5056/api/v1/users/update/{id}
+ http://localhost:5005/api/v1/users/updata
 
-  http://localhost:5056/api/v1/users/delete/{id}
+  http://localhost:5005/api/v1/users/delete
  

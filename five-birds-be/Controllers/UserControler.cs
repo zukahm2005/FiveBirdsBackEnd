@@ -20,7 +20,7 @@ namespace five_birds_be.Controllers
         }
 
         [HttpGet("all/{pageNumber}")]
-        [Authorize(Roles ="ROLE_ADMIN")]
+        [Authorize(Roles = "ROLE_ADMIN")]
         public async Task<IActionResult> GetAllUser(int pageNumber)
         {
             var users = await _userService.GetUsersPaged(pageNumber);
@@ -37,50 +37,53 @@ namespace five_birds_be.Controllers
         {
             var postUser = await _userService.Register(user);
 
-            if (postUser == null)
+            // Kiểm tra mã lỗi trong ApiResponse
+            if (postUser.ErrorCode == 400)
             {
-                return BadRequest(ApiResponse<UserResponseDTO>.Failure(400, "Failed to create user"));
+                return BadRequest(postUser); 
             }
-            return Ok(postUser);
+
+            return Ok(postUser); 
         }
 
-        [HttpPut("update/{id}")]
-        [Authorize("ROLE_USER")]
 
-        public async Task<IActionResult> UpdataUser([FromRoute] int id, [FromBody] UserDTO user)
+
+        [HttpPut("updata")]
+        [Authorize(Roles ="ROLE_USER")]
+
+        public async Task<IActionResult> UpdataUser([FromBody] UserDTO user)
         {
-            var data = await _userService.UpdataUser(id, user);
-            if (data == null)
+            var data = await _userService.UpdataUser(user);
+            if (data.ErrorCode == 404)
             {
-                return BadRequest(ApiResponse<User>.Failure(400, "Failed to put user"));
+                return NotFound(data);
             }
-            return Ok(ApiResponse<User>.Success(201, data, "Users updata successfully"));
+            return Ok(data);
         }
-        [HttpDelete("delete/{id}")]
-        [Authorize("ROLE_ADMIN")]
-        public async Task<IActionResult> DeleteUser([FromRoute] int id)
+        [HttpDelete("delete")]
+        [Authorize(Roles ="ROLE_ADMIN")]
+        public async Task<IActionResult> DeleteUser()
         {
-            var data = await _userService.DeleteUser(id);
-            if (data == null)
+            var data = await _userService.DeleteUser();
+            if (data.ErrorCode == 404)
             {
-                return BadRequest(ApiResponse<User>.Failure(400, "Failed to delete user"));
+                return NotFound(data);
             }
-            return Ok(ApiResponse<User>.Success(200, null, "Users delete successfully "));
+            return NoContent();
         }
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] UserLoginDTO userDTO)
         {
             var data = await _userService.Login(userDTO);
 
-            if (data == null)
+            if (data.ErrorCode == 400)
             {
-                // Return Unauthorized for failed login attempt
-                return Unauthorized(ApiResponse<User>.Failure(401, "Invalid credentials"));
+                return BadRequest(data);
             }
             return Ok(data);
         }
         [HttpGet]
-        [Authorize("ROLE_ADMIN, ROLE_USER")]
+        [Authorize(Roles ="ROLE_ADMIN, ROLE_USER")]
         public async Task<IActionResult> GetUserById(int id)
         {
             var data = await _userService.GetUserById(id);

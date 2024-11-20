@@ -18,5 +18,9 @@ namespace five_birds_be.Models
 
         [JsonConverter(typeof(StringEnumConverter))]
         public Role Role { get; set; } = Role.ROLE_USER;
+
+        public DateTime Create_at { get; set; } = DateTime.Now;
+
+        public DateTime Update_at { get; set;} = DateTime.Now;
     }
 }
