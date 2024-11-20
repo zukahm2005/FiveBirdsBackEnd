@@ -1,3 +1,4 @@
+using System.IdentityModel.Tokens.Jwt;
 using five_birds_be.Dto;
 using five_birds_be.DTO.Request;
 using five_birds_be.Models;
@@ -81,7 +82,7 @@ namespace five_birds_be.Controllers
         }
 
         [HttpPost("forgot")]
-        public async Task<IActionResult> ForgotPassword([FromBody]ForgotPasswordRequest request)
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
         {
             var data = await _userService.ForgotPassword(request.Email);
 
@@ -89,5 +90,36 @@ namespace five_birds_be.Controllers
 
             return Ok(data);
         }
+        [HttpGet("checktoken")]
+        public async Task<IActionResult> CheckToken()
+        {
+            try
+            {
+                string? token = Request.Cookies["token"];
+
+                if (string.IsNullOrEmpty(token))
+                {
+                    return BadRequest(new { message = "Token không tồn tại trong cookie." });
+                }
+
+                var handler = new JwtSecurityTokenHandler();
+                var claims = handler.ReadJwtToken(token).Claims;
+
+                var resultList = claims.Select(c => new
+                {
+                    Type = c.Type,
+                    Value = c.Value
+                }).ToList();
+
+                return Ok(resultList);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Lỗi khi kiểm tra token", error = ex.Message });
+            }
+        }
+
+        
+
     }
 }
