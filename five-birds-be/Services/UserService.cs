@@ -6,16 +6,10 @@ using five_birds_be.DTO.Response;
 using five_birds_be.Jwt;
 using five_birds_be.Models;
 using five_birds_be.Response;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace five_birds_be.Services
 {
-
-
     public class UserService
     {
         private DataContext _dataContext;
@@ -37,7 +31,6 @@ namespace five_birds_be.Services
                 .Take(10)
                 .ToListAsync();
         }
-
 
         public async Task<ApiResponse<UserResponseDTO>> Register(UserDTO userDTO)
         {
@@ -72,19 +65,18 @@ namespace five_birds_be.Services
             return ApiResponse<UserResponseDTO>.Success(200, responseUserDTO, "User registered successfully");
         }
 
-        public async Task<ApiResponse<UserResponseDTO>> UpdataUser(UserDTO userDTO)
+        public async Task<ApiResponse<UserResponseDTO>> UpdateUser(UserDTO userDTO)
         {
             var userId = _jservice.GetUserIdFromHttpContext();
             var user = await _dataContext.Users.FindAsync(userId);
-            if (user == null)
-            {
-                return ApiResponse<UserResponseDTO>.Failure(404, " UserId NotFound");
-            }
+
+            if (user == null) return ApiResponse<UserResponseDTO>.Failure(404, " UserId NotFound");
+
             user.UserName = userDTO.UserName;
             user.Password = BCrypt.Net.BCrypt.HashPassword(userDTO.Password);
             user.Email = userDTO.Email;
             user.Create_at = user.Create_at;
-            user.Update_at = DateTime.Now; 
+            user.Update_at = DateTime.Now;
 
             var userResponseDTO = new UserResponseDTO
             {
@@ -98,37 +90,16 @@ namespace five_birds_be.Services
             return ApiResponse<UserResponseDTO>.Success(200, userResponseDTO, "Updata user success");
         }
 
-        public async Task<ApiResponse<string>> DeleteUser()
-        {
-            var userId = _jservice.GetUserIdFromHttpContext();
-            var user = await _dataContext.Users.FindAsync(userId);
-
-            if (user == null)
-            {
-                return ApiResponse<string>.Failure(404, " UserId NotFound");
-            }
-            _dataContext.Users.Remove(user);
-
-            await _dataContext.SaveChangesAsync();
-
-            return ApiResponse<string>.Success(204, "Delete User Succuss");
-        }
         public async Task<ApiResponse<string>> Login(UserLoginDTO userDTO)
         {
             var user = await _dataContext.Users
             .FirstOrDefaultAsync(u => u.UserName == userDTO.UserName);
 
-            if (user == null)
-            {
-                return ApiResponse<string>.Failure(400, "Incorrect username or password");
-            }
+            if (user == null) return ApiResponse<string>.Failure(400, "Incorrect username or password");
 
             var passwordMatch = BCrypt.Net.BCrypt.Verify(userDTO.Password, user.Password);
 
-            if (!passwordMatch)
-            {
-                return ApiResponse<string>.Failure(400, "Incorrect username or password");
-            }
+            if (!passwordMatch)  return ApiResponse<string>.Failure(400, "Incorrect username or password");
 
             var token = _jservice.GenerateJwtToken(user);
 
@@ -142,28 +113,17 @@ namespace five_birds_be.Services
 
             _httpContextAccessor.HttpContext.Response.Cookies.Append("access_token", token, cookieOptions);
 
-            var responseUserDTO = new UserResponseDTO
-            {
-                UserName = user.UserName,
-                Email = user.Email
-            };
-
             return ApiResponse<string>.Success(200, token, "User logged in successfully.");
         }
 
-
-        public async Task<ApiResponse<string>> GetUserById(int id)
+        public async Task<ApiResponse<int>> GetUserById()
         {
             var userId = _jservice.GetUserIdFromHttpContext();
-            if (userId == null)
-            {
-                return ApiResponse<string>.Failure(400, "userid not found");
-            }
-            return ApiResponse<string>.Success(200, userId.ToString(), "get User id success");
+            if (userId == null) return ApiResponse<int>.Failure(400, "userid not found");
+    
+            return ApiResponse<int>.Success(200, userId.Value , "get User id success");
         }
-
-
-
+        
         public User ConvertToEntity(UserResponseDTO userResponseDTO)
         {
             return new User

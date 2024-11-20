@@ -14,7 +14,6 @@ namespace five_birds_be.Dto
         [Required(ErrorMessage = "Email is required")]
         [EmailAddress(ErrorMessage = "Invalid email address")]
         public string Email { get; set; }
-
         public DateTime Update_at { get; set; }
     }
 }
