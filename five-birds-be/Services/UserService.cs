@@ -124,7 +124,7 @@ namespace five_birds_be.Services
                 Expires = DateTime.UtcNow.AddDays(7)
             };
 
-            _httpContextAccessor.HttpContext.Response.Cookies.Append("access_token", token, cookieOptions);
+            _httpContextAccessor.HttpContext.Response.Cookies.Append("token", token, cookieOptions);
 
             return ApiResponse<string>.Success(200, token, "User logged in successfully.");
         }

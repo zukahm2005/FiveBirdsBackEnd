@@ -67,7 +67,7 @@ namespace five_birds_be.Controllers
         [HttpPost("logout")]
         public async Task<IActionResult> Logout()
         {
-            Response.Cookies.Delete("access_token");
+            Response.Cookies.Delete("token");
             return Ok(new { message = "Logged out successfully." });
         }
 
