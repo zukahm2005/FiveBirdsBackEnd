@@ -35,7 +35,7 @@ builder.Services.AddAuthentication("Bearer")
         };
     });
 
-
+dsdasd
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngularClient",
