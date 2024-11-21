@@ -91,7 +91,8 @@ namespace five_birds_be.Controllers
         public async Task<IActionResult> GetUserById()
         {
             var data = await _userService.GetUserById();
-
+            if (data.ErrorCode == 404) BadRequest(data);
+            if (data.ErrorCode == 400) BadRequest(data);
             return Ok(data);
         }
 

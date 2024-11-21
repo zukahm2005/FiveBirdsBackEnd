@@ -15,7 +15,7 @@ namespace five_birds_be.Services
     {
         private DataContext _dataContext;
         private JwtService _jservice;
-         private IMemoryCache _cache;
+        private IMemoryCache _cache;
         private IHttpContextAccessor _httpContextAccessor;
         private EmailService _emailService;
         public UserService(DataContext dataContext, JwtService jservice, IHttpContextAccessor httpContextAccessor, EmailService emailService, IMemoryCache cache)
@@ -147,12 +147,23 @@ namespace five_birds_be.Services
             return ApiResponse<string>.Success(200, token, "User logged in successfully.");
         }
 
-        public async Task<ApiResponse<int>> GetUserById()
+        public async Task<ApiResponse<UserResponseDTO>> GetUserById()
         {
             var userId = _jservice.GetUserIdFromHttpContext();
-            if (userId == null) return ApiResponse<int>.Failure(400, "userid not found");
+            if (userId == null) return ApiResponse<UserResponseDTO>.Failure(404, "userid not found");
+            Console.WriteLine($"userId: {userId}");
 
-            return ApiResponse<int>.Success(200, userId.Value, "get User id success");
+            var user = await _dataContext.Users.FirstOrDefaultAsync(u => u.UserId == userId);
+            if (user == null) return ApiResponse<UserResponseDTO>.Failure(404, "user null");
+             
+             var userResponseDTO = new UserResponseDTO{
+                UserName = user.UserName,
+                Email = user.Email,
+                Create_at = user.Create_at,
+                Update_at = user.Update_at,
+             };
+
+            return ApiResponse<UserResponseDTO>.Success(200, userResponseDTO, "get User id success");
         }
 
         public async Task<ApiResponse<string>> ForgotPassword(ForgotPasswordRequest request)

@@ -43,7 +43,6 @@ builder.Services.AddAuthentication("Bearer")
             {
                 var claimsIdentity = context.Principal.Identity as ClaimsIdentity;
 
-                // Ánh xạ "Role" thành ClaimTypes.Role
                 var roleClaim = claimsIdentity?.FindFirst("Role");
                 if (roleClaim != null)
                 {
