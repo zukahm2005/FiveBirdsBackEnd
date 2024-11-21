@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("five-birds-be")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ce445a19d436be054ad4e6e63e21aec9543b77ad")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2b9f247d3b9e67423f111ae3e9839d2cfa9b3423")]
 [assembly: System.Reflection.AssemblyProductAttribute("five-birds-be")]
 [assembly: System.Reflection.AssemblyTitleAttribute("five-birds-be")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
