@@ -1,4 +1,5 @@
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using five_birds_be.Dto;
 using five_birds_be.DTO.Request;
 using five_birds_be.Models;
@@ -21,15 +22,19 @@ namespace five_birds_be.Controllers
         }
 
         [HttpGet("all/{pageNumber}")]
-        [Authorize(Roles = "ROLE_ADMIN")]   
+        [Authorize(Roles = "ROLE_ADMIN")]
         public async Task<IActionResult> GetAllUser(int pageNumber)
         {
-            var users = await _userService.GetUsersPaged(pageNumber);
+            var role = User.FindFirst(ClaimTypes.Role)?.Value;
+            Console.WriteLine($"User Role: {role}");
 
-            if (users == null || !users.Any()) return NotFound(ApiResponse<List<User>>.Failure(404, "No users found"));
+            var users = await _userService.GetUsersPaged(pageNumber);
+            if (users == null || !users.Any())
+                return NotFound(ApiResponse<List<User>>.Failure(404, "No users found"));
 
             return Ok(ApiResponse<List<User>>.Success(200, users, "Users retrieved successfully"));
         }
+
 
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] UserDTO user)
