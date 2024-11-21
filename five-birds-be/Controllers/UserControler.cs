@@ -34,6 +34,16 @@ namespace five_birds_be.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] UserDTO user)
         {
+            if (!ModelState.IsValid) // Kiểm tra lỗi từ DataAnnotations
+            {
+                var errors = ModelState.Values
+                                        .SelectMany(v => v.Errors)
+                                        .Select(e => e.ErrorMessage)
+                                        .ToList();
+
+                var errorResponse = ApiResponse<string>.Failure(400, string.Join("; ", errors));
+                return BadRequest(errorResponse);
+            }
             var postUser = await _userService.Register(user);
 
             if (postUser.ErrorCode == 400) return BadRequest(postUser);

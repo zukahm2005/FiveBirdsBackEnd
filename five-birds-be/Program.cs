@@ -2,7 +2,9 @@ using System.Text;
 using System.Text.Json.Serialization;
 using five_birds_be.Data;
 using five_birds_be.Jwt;
+using five_birds_be.Response;
 using five_birds_be.Services;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
@@ -34,6 +36,19 @@ builder.Services.AddAuthentication("Bearer")
             IssuerSigningKey = new SymmetricSecurityKey (Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
         };
     });
+
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.InvalidModelStateResponseFactory = context =>
+    {
+        var errors = context.ModelState.Values
+                             .SelectMany(v => v.Errors)
+                             .Select(e => e.ErrorMessage)
+                             .ToList();
+        var errorResponse = ApiResponse<string>.Failure(400, string.Join("; ", errors));
+        return new BadRequestObjectResult(errorResponse);
+    };
+});
 
 
 builder.Services.AddCors(options =>
