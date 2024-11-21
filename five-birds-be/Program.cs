@@ -1,9 +1,11 @@
+using System.Security.Claims;
 using System.Text;
 using System.Text.Json.Serialization;
 using five_birds_be.Data;
 using five_birds_be.Jwt;
 using five_birds_be.Response;
 using five_birds_be.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -34,6 +36,22 @@ builder.Services.AddAuthentication("Bearer")
             ValidIssuer = builder.Configuration["Jwt:Issuer"],
             ValidAudience = builder.Configuration["Jwt:Audience"],
             IssuerSigningKey = new SymmetricSecurityKey (Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+        };
+         options.Events = new JwtBearerEvents
+        {
+            OnTokenValidated = context =>
+            {
+                var claimsIdentity = context.Principal.Identity as ClaimsIdentity;
+
+                // Ánh xạ "Role" thành ClaimTypes.Role
+                var roleClaim = claimsIdentity?.FindFirst("Role");
+                if (roleClaim != null)
+                {
+                    claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, roleClaim.Value));
+                }
+
+                return Task.CompletedTask;
+            }
         };
     });
 
