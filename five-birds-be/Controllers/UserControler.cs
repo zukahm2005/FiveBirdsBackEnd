@@ -1,4 +1,5 @@
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using five_birds_be.Dto;
 using five_birds_be.DTO.Request;
 using five_birds_be.Models;
@@ -21,15 +22,19 @@ namespace five_birds_be.Controllers
         }
 
         [HttpGet("all/{pageNumber}")]
-        [Authorize(Roles = "ROLE_ADMIN")]   
+        [Authorize(Roles = "ROLE_ADMIN")]
         public async Task<IActionResult> GetAllUser(int pageNumber)
         {
-            var users = await _userService.GetUsersPaged(pageNumber);
+            var role = User.FindFirst(ClaimTypes.Role)?.Value;
+            Console.WriteLine($"User Role: {role}");
 
-            if (users == null || !users.Any()) return NotFound(ApiResponse<List<User>>.Failure(404, "No users found"));
+            var users = await _userService.GetUsersPaged(pageNumber);
+            if (users == null || !users.Any())
+                return NotFound(ApiResponse<List<User>>.Failure(404, "No users found"));
 
             return Ok(ApiResponse<List<User>>.Success(200, users, "Users retrieved successfully"));
         }
+
 
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] UserDTO user)
@@ -110,8 +115,10 @@ namespace five_birds_be.Controllers
         public async Task<IActionResult> CheckOtp([FromBody] VerifyOtpRequest request)
         {
             var data = await _userService.VerifyOtpAndResetPassword(request);
+
             if (data.ErrorCode == 404) return NotFound(data);
             if (data.ErrorCode == 400) return BadRequest(data);
+
             return Ok(data);
         }
 
@@ -178,6 +185,19 @@ namespace five_birds_be.Controllers
                 return StatusCode(500, new { message = "Error when checking the relay.", error = ex.Message });
             }
         }
+
+        [HttpPost("verifyemail")]
+        public async Task<IActionResult> VerifyEmail([FromBody] VerifyEmail emailRequest)
+        {
+            var verificationResult = await _userService.VerifyEmail(emailRequest);
+
+            if (verificationResult.ErrorCode == 400)
+            {
+                return BadRequest(verificationResult);
+            }
+            return Ok(verificationResult);
+        }
+
 
 
     }

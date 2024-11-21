@@ -33,12 +33,19 @@ builder.Services.AddAuthentication("Bearer")
             ValidateAudience = false,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidAudience = builder.Configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey (Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
         };
-         options.Events = new JwtBearerEvents
+        options.Events = new JwtBearerEvents
         {
+            OnMessageReceived = context =>
+ {
+     if (string.IsNullOrEmpty(context.Token) && context.Request.Cookies.ContainsKey("token"))
+     {
+         context.Token = context.Request.Cookies["token"];
+     }
+     return Task.CompletedTask;
+ }
+,
             OnTokenValidated = context =>
             {
                 var claimsIdentity = context.Principal.Identity as ClaimsIdentity;
@@ -52,7 +59,9 @@ builder.Services.AddAuthentication("Bearer")
                 return Task.CompletedTask;
             }
         };
+
     });
+
 
 builder.Services.Configure<ApiBehaviorOptions>(options =>
 {
@@ -80,14 +89,10 @@ builder.Services.AddCors(options =>
 
 builder.WebHost.UseUrls("http://localhost:5005");
 builder.Services.AddScoped<UserService>();
-builder.Services.AddScoped<JwtService>(); 
+builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<EmailService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddMemoryCache();
-
-
-
-
 
 builder.Services.AddSwaggerGen();
 
@@ -97,17 +102,17 @@ builder.Services.AddEndpointsApiExplorer();
 
 var app = builder.Build();
 
-app.UseAuthentication(); 
+app.UseCors("AllowReactClient");
+app.UseAuthentication();
 app.UseAuthorization();
 
 
 app.UseSwagger();
-app.UseSwaggerUI(c => 
+app.UseSwaggerUI(c =>
 {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "API Documentation V1");
-    c.RoutePrefix = string.Empty; 
+    c.RoutePrefix = string.Empty;
 });
-app.UseCors("AllowReactClient");
 app.UseHttpsRedirection();
 app.MapControllers();
 app.Run();

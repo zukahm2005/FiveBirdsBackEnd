@@ -40,15 +40,13 @@ namespace five_birds_be.Services
 
         public async Task<ApiResponse<string>> Register(UserDTO userDTO)
         {
-            // Kiểm tra nếu email đã tồn tại
             var existingUser = await _dataContext.Users.FirstOrDefaultAsync(u => u.Email == userDTO.Email);
             if (existingUser != null)
             {
-                return ApiResponse<string>.Failure(400, "Email đã được sử dụng.");
+                return ApiResponse<string>.Failure(400, "Email already in use.");
             }
 
-            // Tạo người dùng mới
-            var user = new User
+            var temporaryUser = new User
             {
                 UserName = userDTO.UserName,
                 Email = userDTO.Email,
@@ -56,35 +54,55 @@ namespace five_birds_be.Services
                 Create_at = DateTime.UtcNow
             };
 
-            await _dataContext.Users.AddAsync(user);
-            await _dataContext.SaveChangesAsync();
+            _cache.Set(userDTO.Email, temporaryUser, TimeSpan.FromMinutes(5));
 
-            // Gửi email xác nhận
-            var subject = "Đăng ký tài khoản thành công";
+            var otp = new Random().Next(100000, 999999).ToString();
+            var hashedOtp = BCrypt.Net.BCrypt.HashPassword(otp);
+
+            _cache.Set($"otp:{userDTO.Email}", hashedOtp, TimeSpan.FromMinutes(5));
+
+            var subject = "Account registration successful";
             var body = $@"
                     <html>
                         <body>
-                            <p>Hello <strong>{userDTO.UserName}</strong>,</p>
-
-                            <p>Congratulations on successfully registering an account with our system.</p>
-                            
-                            <p><strong>Your account details:</strong></p>
-                            <ul>
-                                <li>Email: {userDTO.Email}</li>
-                            </ul>
-                            
-                            <p>Thank you for using our services.</p>
-                            
-                            <p>Best regards,</p>
-                            <p><em>The Support Team</em></p>
+                            <p>Hello,</p>
+                            <p>Your email verification code is: <strong>{otp}</strong></p>
+                            <p>This code will expire in 5 minutes.</p>
+                            <p>Thank you for using our service!</p>
                         </body>
-                    </html>
-                ";
+                    </html>";
 
             await _emailService.SendEmailAsync(userDTO.Email, subject, body);
 
-            return ApiResponse<string>.Success(200, null, "Tài khoản đã được tạo thành công và email xác nhận đã được gửi.");
+            return ApiResponse<string>.Success(200, null, "Account created successfully and confirmation email sent.");
         }
+
+
+        public async Task<ApiResponse<string>> VerifyEmail(VerifyEmail email)
+        {
+            if (!_cache.TryGetValue($"otp:{email.Email}", out string cachedHashedOtp))
+            {
+                return ApiResponse<string>.Failure(400, "OTP has expired.");
+            }
+            if (!BCrypt.Net.BCrypt.Verify(email.Otp, cachedHashedOtp))
+            {
+                return ApiResponse<string>.Failure(400, "Invalid OTP.");
+            }
+            if (!_cache.TryGetValue(email.Email, out User temporaryUser))
+            {
+                return ApiResponse<string>.Failure(400, "Temporary user data not found or expired.");
+            }
+
+            _cache.Remove($"otp:{email.Email}");
+            _cache.Remove(email.Email);
+
+            await _dataContext.Users.AddAsync(temporaryUser);
+            await _dataContext.SaveChangesAsync();
+
+            return ApiResponse<string>.Success(200, null, "Email verified and account created successfully.");
+        }
+
+
 
         public async Task<ApiResponse<UserResponseDTO>> UpdateUser(UserDTO userDTO)
         {
@@ -155,17 +173,17 @@ namespace five_birds_be.Services
 
             var user = await _dataContext.Users.FirstOrDefaultAsync(u => u.UserId == userId);
             if (user == null) return ApiResponse<UserResponseDTO>.Failure(404, "user null");
-             
-             var userResponseDTO = new UserResponseDTO{
+
+            var userResponseDTO = new UserResponseDTO
+            {
                 UserName = user.UserName,
                 Email = user.Email,
                 Create_at = user.Create_at,
                 Update_at = user.Update_at,
-             };
+            };
 
             return ApiResponse<UserResponseDTO>.Success(200, userResponseDTO, "get User id success");
         }
-
         public async Task<ApiResponse<string>> ForgotPassword(ForgotPasswordRequest request)
         {
             var user = await _dataContext.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
@@ -174,7 +192,8 @@ namespace five_birds_be.Services
 
             var otp = new Random().Next(100000, 999999).ToString();
 
-            _cache.Set(user.Email, otp, TimeSpan.FromMinutes(5));
+            var hashedOtp = BCrypt.Net.BCrypt.HashPassword(otp);
+            _cache.Set(user.Email, hashedOtp, TimeSpan.FromMinutes(5));
 
             var subject = "Reset Password OTP";
             var body = $"Your OTP code to reset your password is: {otp}. This code will expire in 5 minutes.";
@@ -188,12 +207,12 @@ namespace five_birds_be.Services
             var user = await _dataContext.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
             if (user == null) return ApiResponse<string>.Failure(404, "Email does not exist.");
 
-            if (!_cache.TryGetValue(request.Email, out string cachedOtp))
+            if (!_cache.TryGetValue(request.Email, out string cachedHashedOtp))
             {
                 return ApiResponse<string>.Failure(400, "OTP has expired.");
             }
 
-            if (cachedOtp != request.Otp)
+            if (!BCrypt.Net.BCrypt.Verify(request.Otp, cachedHashedOtp))
             {
                 return ApiResponse<string>.Failure(400, "Invalid OTP.");
             }
@@ -208,17 +227,6 @@ namespace five_birds_be.Services
 
             return ApiResponse<string>.Success(200, null, "Password has been successfully reset.");
         }
-
-
-        private string GenerateRandomPassword()
-        {
-            var random = new Random();
-            const string chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
-            return new string(Enumerable.Repeat(chars, 10)
-                                        .Select(s => s[random.Next(s.Length)])
-                                        .ToArray());
-        }
-
         public User ConvertToEntity(UserResponseDTO userResponseDTO)
         {
             return new User
