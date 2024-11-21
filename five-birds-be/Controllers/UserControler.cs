@@ -21,7 +21,7 @@ namespace five_birds_be.Controllers
         }
 
         [HttpGet("all/{pageNumber}")]
-        [Authorize(Roles = "ROLE_ADMIN")]   
+        [Authorize(Roles = "ROLE_ADMIN")]
         public async Task<IActionResult> GetAllUser(int pageNumber)
         {
             var users = await _userService.GetUsersPaged(pageNumber);
@@ -109,8 +109,10 @@ namespace five_birds_be.Controllers
         public async Task<IActionResult> CheckOtp([FromBody] VerifyOtpRequest request)
         {
             var data = await _userService.VerifyOtpAndResetPassword(request);
+
             if (data.ErrorCode == 404) return NotFound(data);
             if (data.ErrorCode == 400) return BadRequest(data);
+
             return Ok(data);
         }
 
