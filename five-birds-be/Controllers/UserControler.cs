@@ -114,8 +114,10 @@ namespace five_birds_be.Controllers
         public async Task<IActionResult> CheckOtp([FromBody] VerifyOtpRequest request)
         {
             var data = await _userService.VerifyOtpAndResetPassword(request);
+
             if (data.ErrorCode == 404) return NotFound(data);
             if (data.ErrorCode == 400) return BadRequest(data);
+
             return Ok(data);
         }
 
