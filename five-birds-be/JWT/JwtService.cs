@@ -33,7 +33,7 @@ namespace five_birds_be.Jwt
 
             var claims = new[]
             {
-                new Claim(ClaimTypes.Role, user.Role.ToString()),
+                new Claim("Role", user.Role.ToString()),
                 new Claim("UserId", user.UserId.ToString()),
             };
 

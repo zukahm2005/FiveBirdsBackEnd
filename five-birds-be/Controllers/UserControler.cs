@@ -70,20 +70,19 @@ namespace five_birds_be.Controllers
         {
             try
             {
-                // Xóa cookie bằng cách set thời gian hết hạn trong quá khứ
                 Response.Cookies.Append("token", "", new CookieOptions
                 {
                     HttpOnly = true,
-                    Secure = true, // Chỉ hoạt động trên HTTPS
+                    Secure = true,
                     SameSite = SameSiteMode.Strict,
-                    Expires = DateTime.UtcNow.AddDays(-1) // Set thời gian hết hạn trong quá khứ
+                    Expires = DateTime.UtcNow.AddDays(-1)
                 });
 
                 return Ok(new { message = "Logged out successfully." });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Lỗi khi logout", error = ex.Message });
+                return StatusCode(500, new { message = "Error when logging out", error = ex.Message });
             }
         }
 
@@ -107,26 +106,25 @@ namespace five_birds_be.Controllers
         }
 
         [HttpPost("checkotp")]
-        public async Task<IActionResult> CheckOtp([FromBody] VerifyOtpRequest request){
+        public async Task<IActionResult> CheckOtp([FromBody] VerifyOtpRequest request)
+        {
             var data = await _userService.VerifyOtpAndResetPassword(request);
-            if(data.ErrorCode == 404) return NotFound(data);
-            if(data.ErrorCode == 400) return BadRequest(data);
+            if (data.ErrorCode == 404) return NotFound(data);
+            if (data.ErrorCode == 400) return BadRequest(data);
             return Ok(data);
         }
 
-       [HttpGet("checktoken")]
+        [HttpGet("checktoken")]
         public IActionResult CheckToken()
         {
             try
             {
-                // Lấy token từ cookie
                 string? token = Request.Cookies["token"];
                 if (string.IsNullOrEmpty(token))
                 {
-                    return Ok(new { isLoggedIn = false, message = "Chưa đăng nhập." });
+                    return Ok(new { isLoggedIn = false, message = "Not logged in." });
                 }
 
-                // Giải mã token để kiểm tra
                 var handler = new JwtSecurityTokenHandler();
                 try
                 {
@@ -138,18 +136,48 @@ namespace five_birds_be.Controllers
                         Value = c.Value
                     }).ToList();
 
-                    return Ok(new { isLoggedIn = true, claims = resultList, message = "Đã đăng nhập." });
+                    return Ok(new { isLoggedIn = true, claims = resultList, message = "Already logged in." });
                 }
                 catch
                 {
-                    return BadRequest(new { isLoggedIn = false, message = "Token không hợp lệ." });
+                    return BadRequest(new { isLoggedIn = false, message = "Invalid token." });
                 }
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { isLoggedIn = false, message = "Lỗi khi kiểm tra token.", error = ex.Message });
+                return StatusCode(500, new { isLoggedIn = false, message = "Error checking token.", error = ex.Message });
             }
         }
+
+
+        [HttpGet("checkrole")]
+        public IActionResult CheckRole()
+        {
+            try
+            {
+                string? token = Request.Cookies["token"];
+                if (string.IsNullOrEmpty(token))
+                {
+                    return BadRequest(new { message = "Token does not exist in cookie." });
+                }
+
+                var handler = new JwtSecurityTokenHandler();
+                var jwtToken = handler.ReadJwtToken(token);
+
+                var roleClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "Role")?.Value;
+                if (string.IsNullOrEmpty(roleClaim))
+                {
+                    return BadRequest(new { message = "Role does not exist in token." });
+                }
+
+                return Ok(new { role = roleClaim, message = "Get role successfully." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error when checking the relay.", error = ex.Message });
+            }
+        }
+
 
     }
 }
