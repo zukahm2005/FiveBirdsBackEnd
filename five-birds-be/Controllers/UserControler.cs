@@ -1,5 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using five_birds_be.Data;
 using five_birds_be.Dto;
 using five_birds_be.DTO.Request;
 using five_birds_be.Models;
@@ -7,6 +8,8 @@ using five_birds_be.Response;
 using five_birds_be.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+
 
 
 namespace five_birds_be.Controllers
@@ -15,19 +18,20 @@ namespace five_birds_be.Controllers
     [Route("api/v1/users")]
     public class UserController : ControllerBase
     {
+        private DataContext _datacontext;
         private readonly UserService _userService;
-        public UserController(UserService userService)
+        private EmailService _emailService;
+        public UserController(UserService userService, DataContext datacontext, EmailService emailService)
         {
             _userService = userService;
+            _datacontext = datacontext;
+            _emailService = emailService;
         }
 
         [HttpGet("all/{pageNumber}")]
         [Authorize(Roles = "ROLE_ADMIN")]
         public async Task<IActionResult> GetAllUser(int pageNumber)
         {
-            var role = User.FindFirst(ClaimTypes.Role)?.Value;
-            Console.WriteLine($"User Role: {role}");
-
             var users = await _userService.GetUsersPaged(pageNumber);
             if (users == null || !users.Any())
                 return NotFound(ApiResponse<List<User>>.Failure(404, "No users found"));
@@ -42,6 +46,7 @@ namespace five_birds_be.Controllers
             var postUser = await _userService.Register(user);
 
             if (postUser.ErrorCode == 400) return BadRequest(postUser);
+
 
             return Ok(postUser);
         }
@@ -66,6 +71,8 @@ namespace five_birds_be.Controllers
             var data = await _userService.Login(userDTO);
 
             if (data.ErrorCode == 400) return BadRequest(data);
+
+            if(data.ErrorCode == 403) return Forbid(data.Message);
 
             return Ok(data);
         }
@@ -199,6 +206,16 @@ namespace five_birds_be.Controllers
         }
 
 
+        [HttpGet("change-device-trust")]
+        public async Task<IActionResult> ChangeDeviceTrust(int userId, string deviceInfo, bool trust)
+        {
+          var data = await _userService.ChangeDeviceTrust(userId, deviceInfo, trust);
 
+          if (data.ErrorCode == 404) return NotFound(data);
+
+          return Ok(data);
+
+        }
+           
     }
 }
