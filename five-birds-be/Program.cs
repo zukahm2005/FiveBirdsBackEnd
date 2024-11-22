@@ -38,18 +38,15 @@ builder.Services.AddAuthentication("Bearer")
         options.Events = new JwtBearerEvents
         {
             OnMessageReceived = context =>
+
         {
             if (string.IsNullOrEmpty(context.Token) && context.Request.Cookies.ContainsKey("token"))
             {
                 context.Token = context.Request.Cookies["token"];
-                Console.WriteLine("Token from cookie: " + context.Token);
-            }
-            else
-            {
-                Console.WriteLine("Not found token form cookie.");
             }
             return Task.CompletedTask;
         },
+
             OnTokenValidated = context =>
             {
                 var claimsIdentity = context.Principal.Identity as ClaimsIdentity;
@@ -97,10 +94,6 @@ builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<EmailService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddMemoryCache();
-
-
-
-
 
 builder.Services.AddSwaggerGen();
 

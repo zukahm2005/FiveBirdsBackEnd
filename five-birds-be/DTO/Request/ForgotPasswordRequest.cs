@@ -14,4 +14,10 @@ namespace five_birds_be.DTO.Request
         public string Otp { get; set; }
         public string NewPassword { get; set; }
     }
+     public class VerifyEmail
+{
+    public string Email { get; set; } // Email của người dùng để liên kết với OTP
+    public string Otp { get; set; }   // OTP cần xác thực
+}
+
 }

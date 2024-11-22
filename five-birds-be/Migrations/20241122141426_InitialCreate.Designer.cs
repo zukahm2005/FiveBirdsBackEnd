@@ -11,8 +11,8 @@ using five_birds_be.Data;
 namespace five_birds_be.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20241120160457_AddOtpRecordTable")]
-    partial class AddOtpRecordTable
+    [Migration("20241122141426_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -22,27 +22,31 @@ namespace five_birds_be.Migrations
                 .HasAnnotation("ProductVersion", "8.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
-            modelBuilder.Entity("five_birds_be.Models.OtpRecord", b =>
+            modelBuilder.Entity("five_birds_be.Models.TrustedDevice", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("ExpirationTime")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("Otp")
+                    b.Property<string>("DeviceIdentifier")
                         .IsRequired()
                         .HasColumnType("longtext");
+
+                    b.Property<bool>("IsTrusted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<DateTime?>("LastEmailSent")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("TrustedUntil")
+                        .HasColumnType("datetime(6)");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
-
-                    b.ToTable("OtpRecords");
+                    b.ToTable("TrustedDevices");
                 });
 
             modelBuilder.Entity("five_birds_be.Models.User", b =>
@@ -75,17 +79,6 @@ namespace five_birds_be.Migrations
                     b.HasKey("UserId");
 
                     b.ToTable("Users");
-                });
-
-            modelBuilder.Entity("five_birds_be.Models.OtpRecord", b =>
-                {
-                    b.HasOne("five_birds_be.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
                 });
 #pragma warning restore 612, 618
         }
