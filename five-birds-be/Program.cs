@@ -38,14 +38,15 @@ builder.Services.AddAuthentication("Bearer")
         options.Events = new JwtBearerEvents
         {
             OnMessageReceived = context =>
- {
-     if (string.IsNullOrEmpty(context.Token) && context.Request.Cookies.ContainsKey("token"))
-     {
-         context.Token = context.Request.Cookies["token"];
-     }
-     return Task.CompletedTask;
- }
-,
+
+        {
+            if (string.IsNullOrEmpty(context.Token) && context.Request.Cookies.ContainsKey("token"))
+            {
+                context.Token = context.Request.Cookies["token"];
+            }
+            return Task.CompletedTask;
+        },
+
             OnTokenValidated = context =>
             {
                 var claimsIdentity = context.Principal.Identity as ClaimsIdentity;
