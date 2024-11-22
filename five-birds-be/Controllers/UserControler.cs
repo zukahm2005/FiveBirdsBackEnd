@@ -72,7 +72,7 @@ namespace five_birds_be.Controllers
 
             if (data.ErrorCode == 400) return BadRequest(data);
 
-            if(data.ErrorCode == 403) return Forbid(data.Message);
+            if (data.ErrorCode == 403) return Forbid(data.Message);
 
             return Ok(data);
         }
@@ -207,15 +207,18 @@ namespace five_birds_be.Controllers
 
 
         [HttpGet("change-device-trust")]
-        public async Task<IActionResult> ChangeDeviceTrust(int userId, string deviceInfo, bool trust)
+        public async Task<IActionResult> ChangeDeviceTrust(int userId, string deviceInfo, bool trust, string redirectUrl)
         {
-          var data = await _userService.ChangeDeviceTrust(userId, deviceInfo, trust);
+            var result = await _userService.ChangeDeviceTrust(userId, Uri.UnescapeDataString(deviceInfo), trust);
 
-          if (data.ErrorCode == 404) return NotFound(data);
-
-          return Ok(data);
-
+            if (result.ErrorCode == 400 )
+            {
+                return BadRequest(result);
+            }
+            var decodedRedirectUrl = Uri.UnescapeDataString(redirectUrl);
+            return Redirect(decodedRedirectUrl);
         }
-           
+
+
     }
 }

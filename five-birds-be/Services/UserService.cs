@@ -161,6 +161,7 @@ namespace five_birds_be.Services
             var userAgent = _httpContextAccessor.HttpContext.Request.Headers["User-Agent"].ToString();
             var deviceDetector = new DeviceDetectorNET.DeviceDetector(userAgent);
             deviceDetector.Parse();
+
             var deviceInfo = userAgent;
 
             var trustedDevice = await _dataContext.TrustedDevices
@@ -221,8 +222,10 @@ namespace five_birds_be.Services
         private string GenerateDeviceTrustLink(int userId, string deviceInfo)
         {
             var encodedDeviceInfo = Uri.EscapeDataString(deviceInfo);
-            return $"{_iconfiguration["AppSettings:BaseUrl"]}/api/v1/users/change-device-trust?userId={userId}&deviceInfo={encodedDeviceInfo}&trust=true";
+            var redirectUrl = Uri.EscapeDataString("http://localhost:5173/login");
+            return $"{_iconfiguration["AppSettings:BaseUrl"]}/api/v1/users/change-device-trust?userId={userId}&deviceInfo={encodedDeviceInfo}&trust=true&redirectUrl={redirectUrl}";
         }
+
 
         private async Task SendDeviceVerificationEmail(User user, string deviceInfo, string changeDeviceTrustLink)
         {
@@ -292,7 +295,7 @@ namespace five_birds_be.Services
             _cache.Set(user.Email, hashedOtp, TimeSpan.FromMinutes(5));
 
             var subject = "Reset Password OTP";
-           var body = $@"
+            var body = $@"
                 <html>
                 <body style='font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0;'>
                     <div style='max-width: 600px; margin: 30px auto; background-color: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);'>
@@ -357,12 +360,12 @@ namespace five_birds_be.Services
 
             if (device == null)
             {
-                return ApiResponse<string>.Failure(404 ,"Device not found.");
+                return ApiResponse<string>.Failure(404, "Device not found.");
             }
             device.IsTrusted = trust;
             if (trust)
             {
-                device.TrustedUntil = DateTime.UtcNow.AddMonths(1); 
+                device.TrustedUntil = DateTime.UtcNow.AddMonths(1);
             }
             else
             {
