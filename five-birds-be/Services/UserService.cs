@@ -159,8 +159,6 @@ namespace five_birds_be.Services
                 return ApiResponse<string>.Failure(400, "Incorrect password");
 
             var userAgent = _httpContextAccessor.HttpContext.Request.Headers["User-Agent"].ToString();
-            var deviceDetector = new DeviceDetectorNET.DeviceDetector(userAgent);
-            deviceDetector.Parse();
 
             var deviceInfo = userAgent;
 
@@ -196,7 +194,7 @@ namespace five_birds_be.Services
                 await AddNewUntrustedDevice(user.UserId, deviceInfo);
                 var changeDeviceTrustLink = GenerateDeviceTrustLink(user.UserId, deviceInfo);
                 await SendDeviceVerificationEmail(user, deviceInfo, changeDeviceTrustLink);
-                return ApiResponse<string>.Failure(403, "Login from untrusted device is not allowed.");
+                return ApiResponse<string>.Failure(500, "Please log in to your email to verify your trusted device.");
             }
 
             var token = _jservice.GenerateJwtToken(user);

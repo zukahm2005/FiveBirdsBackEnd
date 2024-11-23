@@ -72,7 +72,8 @@ namespace five_birds_be.Controllers
 
             if (data.ErrorCode == 400) return BadRequest(data);
 
-            if (data.ErrorCode == 403) return Forbid(data.Message);
+            if (data.ErrorCode == 500) return StatusCode(500, data);
+;
 
             return Ok(data);
         }
