@@ -63,6 +63,11 @@ builder.Services.AddAuthentication("Bearer")
 
     });
 
+<<<<<<< HEAD
+=======
+builder.Services.AddScoped<CloudinaryService>();
+
+>>>>>>> mtuanvu
 
 builder.Services.Configure<ApiBehaviorOptions>(options =>
 {

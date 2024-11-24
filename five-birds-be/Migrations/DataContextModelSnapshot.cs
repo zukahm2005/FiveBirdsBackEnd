@@ -19,12 +19,17 @@ namespace five_birds_be.Migrations
                 .HasAnnotation("ProductVersion", "8.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
+<<<<<<< HEAD
             modelBuilder.Entity("five_birds_be.Models.TrustedDevice", b =>
+=======
+            modelBuilder.Entity("five_birds_be.Models.AboutUs", b =>
+>>>>>>> mtuanvu
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
+<<<<<<< HEAD
                     b.Property<string>("DeviceIdentifier")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -44,6 +49,26 @@ namespace five_birds_be.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("TrustedDevices");
+=======
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Position")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AboutUs");
+>>>>>>> mtuanvu
                 });
 
             modelBuilder.Entity("five_birds_be.Models.User", b =>
