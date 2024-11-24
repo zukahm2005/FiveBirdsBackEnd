@@ -15,6 +15,11 @@ namespace five_birds_be.Data
         }
 
          public DbSet<AboutUs> AboutUs { get; set; }
+        public DbSet<Footer> Footers { get; set; } // Quản lý bảng Footer
+
+        public DbSet<FooterImage> FooterImages { get; set; } // Thêm quản lý bảng FooterImage
+
+
     }
 
 }

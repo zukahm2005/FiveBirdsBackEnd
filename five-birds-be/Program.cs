@@ -57,6 +57,9 @@ builder.Services.AddAuthentication("Bearer")
 
 builder.Services.AddScoped<CloudinaryService>();
 
+builder.Services.AddScoped<CloudinaryService>();
+builder.Services.AddScoped<FooterImageService>(); // Đăng ký FooterImageService
+builder.Services.AddScoped<FooterService>();
 
 builder.Services.Configure<ApiBehaviorOptions>(options =>
 {

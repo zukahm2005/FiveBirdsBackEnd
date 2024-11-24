@@ -45,6 +45,29 @@ namespace five_birds_be.Migrations
                     b.ToTable("AboutUs");
                 });
 
+            modelBuilder.Entity("five_birds_be.Models.Footer", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("Column1")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Column2")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Column3")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Footers");
+                });
+
             modelBuilder.Entity("five_birds_be.Models.User", b =>
                 {
                     b.Property<int>("UserId")

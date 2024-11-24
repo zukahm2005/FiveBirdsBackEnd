@@ -32,20 +32,39 @@ namespace five_birds_be.Services
             return uploadResult.SecureUrl.ToString(); // Trả về link ảnh
         }
 
-        public async Task DeleteImageAsync(string imageUrl)
-        {
-            var publicId = ExtractPublicIdFromUrl(imageUrl);
-            var deletionParams = new DeletionParams(publicId);
+       public async Task DeleteImageAsync(string imageUrl)
+{
+    if (string.IsNullOrEmpty(imageUrl))
+    {
+        throw new ArgumentException("Image URL cannot be null or empty");
+    }
 
-            await _cloudinary.DestroyAsync(deletionParams);
-        }
+    try
+    {
+        var publicId = ExtractPublicIdFromUrl(imageUrl);
+        var deletionParams = new DeletionParams(publicId);
+        await _cloudinary.DestroyAsync(deletionParams);
+    }
+    catch (Exception ex)
+    {
+        // Log lỗi nếu cần
+        Console.WriteLine($"Error deleting image: {ex.Message}");
+    }
+}
 
-        private string ExtractPublicIdFromUrl(string imageUrl)
-        {
-            var uri = new Uri(imageUrl);
-            var segments = uri.AbsolutePath.Split('/');
-            var publicIdWithExtension = segments[^1];
-            return publicIdWithExtension.Substring(0, publicIdWithExtension.LastIndexOf('.'));
-        }
+
+      private string ExtractPublicIdFromUrl(string imageUrl)
+{
+    if (string.IsNullOrEmpty(imageUrl))
+    {
+        throw new ArgumentException("Image URL cannot be null or empty");
+    }
+
+    var uri = new Uri(imageUrl);
+    var segments = uri.AbsolutePath.Split('/');
+    var publicIdWithExtension = segments[^1];
+    return publicIdWithExtension.Substring(0, publicIdWithExtension.LastIndexOf('.'));
+}
+
     }
 }
