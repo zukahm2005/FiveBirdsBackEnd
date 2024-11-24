@@ -13,6 +13,8 @@ namespace five_birds_be.Data
         {
         
         }
+
+         public DbSet<AboutUs> AboutUs { get; set; }
     }
 
 }
