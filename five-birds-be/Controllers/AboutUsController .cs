@@ -22,7 +22,6 @@ namespace five_birds_be.Controllers
             _cloudinaryService = cloudinaryService;
         }
 
-        // Lấy danh sách AboutUs
         [HttpGet]
         public async Task<IActionResult> GetAllAboutUs()
         {
@@ -30,7 +29,6 @@ namespace five_birds_be.Controllers
             return Ok(aboutUsList);
         }
 
-        // Thêm mới AboutUs
         [HttpPost("add")]
         public async Task<IActionResult> AddAboutUs([FromForm] string name, [FromForm] string position, [FromForm] string description, [FromForm] IFormFile? image)
         {
@@ -54,7 +52,18 @@ namespace five_birds_be.Controllers
             return Ok(new { message = "AboutUs added successfully.", aboutUs });
         }
 
-        // Cập nhật AboutUs
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetAboutUsById(int id)
+        {
+            var aboutUs = await _context.AboutUs.FindAsync(id);
+            if (aboutUs == null)
+            {
+                return NotFound(new { message = "AboutUs not found." });
+            }
+            return Ok(aboutUs);
+        }
+
+
         [HttpPut("update/{id}")]
         public async Task<IActionResult> UpdateAboutUs(int id, [FromForm] string name, [FromForm] string position, [FromForm] string description, [FromForm] IFormFile? image)
         {
@@ -75,7 +84,7 @@ namespace five_birds_be.Controllers
 
                 if (!string.IsNullOrEmpty(aboutUs.ImageUrl))
                 {
-                    await _cloudinaryService.DeleteImageAsync(aboutUs.ImageUrl); // Xóa ảnh cũ
+                    await _cloudinaryService.DeleteImageAsync(aboutUs.ImageUrl);
                 }
 
                 aboutUs.ImageUrl = imageUrl;
@@ -87,7 +96,6 @@ namespace five_birds_be.Controllers
             return Ok(new { message = "AboutUs updated successfully.", aboutUs });
         }
 
-        // Xóa AboutUs
         [HttpDelete("delete/{id}")]
         public async Task<IActionResult> DeleteAboutUs(int id)
         {
