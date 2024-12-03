@@ -11,8 +11,8 @@ using five_birds_be.Data;
 namespace five_birds_be.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20241124092302_InitialMigration")]
-    partial class InitialMigration
+    [Migration("20241203090231_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -46,6 +46,48 @@ namespace five_birds_be.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("AboutUs");
+                });
+
+            modelBuilder.Entity("five_birds_be.Models.Footer", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("Column1")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Column2")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Column3")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Footers");
+                });
+
+            modelBuilder.Entity("five_birds_be.Models.FooterImage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("AltText")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("FooterImages");
                 });
 
             modelBuilder.Entity("five_birds_be.Models.User", b =>
