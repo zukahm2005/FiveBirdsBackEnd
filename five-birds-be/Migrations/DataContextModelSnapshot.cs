@@ -68,6 +68,25 @@ namespace five_birds_be.Migrations
                     b.ToTable("Footers");
                 });
 
+            modelBuilder.Entity("five_birds_be.Models.FooterImage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("AltText")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("FooterImages");
+                });
+
             modelBuilder.Entity("five_birds_be.Models.User", b =>
                 {
                     b.Property<int>("UserId")
