@@ -48,6 +48,9 @@ namespace five_birds_be.Services
             {
                 return ApiResponse<string>.Failure(400, "Email already in use.");
             }
+            var uername = await _dataContext.Users.FirstOrDefaultAsync(u => u.UserName == userDTO.UserName);
+            if (uername != null) return ApiResponse<string>.Failure(400, " name already in user");
+            
             var temporaryUser = new User
             {
                 UserName = userDTO.UserName,
