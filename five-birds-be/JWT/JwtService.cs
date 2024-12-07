@@ -48,7 +48,7 @@ namespace five_birds_be.Jwt
 
         public int? GetUserIdFromHttpContext()
         {
-            var token = _httpContextAccessor.HttpContext?.Request.Cookies["access_token"];
+            var token = _httpContextAccessor.HttpContext?.Request.Cookies["token"];
 
             if (string.IsNullOrEmpty(token))
             {

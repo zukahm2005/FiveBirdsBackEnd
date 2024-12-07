@@ -1,4 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using five_birds_be.Data;
 using five_birds_be.Dto;
 using five_birds_be.DTO.Request;
 using five_birds_be.Models;
@@ -6,6 +8,8 @@ using five_birds_be.Response;
 using five_birds_be.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+
 
 
 namespace five_birds_be.Controllers
@@ -14,10 +18,14 @@ namespace five_birds_be.Controllers
     [Route("api/v1/users")]
     public class UserController : ControllerBase
     {
+        private DataContext _datacontext;
         private readonly UserService _userService;
-        public UserController(UserService userService)
+        private EmailService _emailService;
+        public UserController(UserService userService, DataContext datacontext, EmailService emailService)
         {
             _userService = userService;
+            _datacontext = datacontext;
+            _emailService = emailService;
         }
 
         [HttpGet("all/{pageNumber}")]
@@ -25,11 +33,12 @@ namespace five_birds_be.Controllers
         public async Task<IActionResult> GetAllUser(int pageNumber)
         {
             var users = await _userService.GetUsersPaged(pageNumber);
-
-            if (users == null || !users.Any()) return NotFound(ApiResponse<List<User>>.Failure(404, "No users found"));
+            if (users == null || !users.Any())
+                return NotFound(ApiResponse<List<User>>.Failure(404, "No users found"));
 
             return Ok(ApiResponse<List<User>>.Success(200, users, "Users retrieved successfully"));
         }
+
 
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] UserDTO user)
@@ -37,6 +46,7 @@ namespace five_birds_be.Controllers
             var postUser = await _userService.Register(user);
 
             if (postUser.ErrorCode == 400) return BadRequest(postUser);
+
 
             return Ok(postUser);
         }
@@ -61,6 +71,9 @@ namespace five_birds_be.Controllers
             var data = await _userService.Login(userDTO);
 
             if (data.ErrorCode == 400) return BadRequest(data);
+
+            if (data.ErrorCode == 500) return StatusCode(500, data);
+;
 
             return Ok(data);
         }
@@ -91,7 +104,8 @@ namespace five_birds_be.Controllers
         public async Task<IActionResult> GetUserById()
         {
             var data = await _userService.GetUserById();
-
+            if (data.ErrorCode == 404) BadRequest(data);
+            if (data.ErrorCode == 400) BadRequest(data);
             return Ok(data);
         }
 
@@ -178,6 +192,32 @@ namespace five_birds_be.Controllers
             {
                 return StatusCode(500, new { message = "Error when checking the relay.", error = ex.Message });
             }
+        }
+
+        [HttpPost("verifyemail")]
+        public async Task<IActionResult> VerifyEmail([FromBody] VerifyEmail emailRequest)
+        {
+            var verificationResult = await _userService.VerifyEmail(emailRequest);
+
+            if (verificationResult.ErrorCode == 400)
+            {
+                return BadRequest(verificationResult);
+            }
+            return Ok(verificationResult);
+        }
+
+
+        [HttpGet("change-device-trust")]
+        public async Task<IActionResult> ChangeDeviceTrust(int userId, string deviceInfo, bool trust, string redirectUrl)
+        {
+            var result = await _userService.ChangeDeviceTrust(userId, Uri.UnescapeDataString(deviceInfo), trust);
+
+            if (result.ErrorCode == 400 )
+            {
+                return BadRequest(result);
+            }
+            var decodedRedirectUrl = Uri.UnescapeDataString(redirectUrl);
+            return Redirect(decodedRedirectUrl);
         }
 
 
