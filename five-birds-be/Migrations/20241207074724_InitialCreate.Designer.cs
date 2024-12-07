@@ -11,7 +11,7 @@ using five_birds_be.Data;
 namespace five_birds_be.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20241122141426_InitialCreate")]
+    [Migration("20241207074724_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
