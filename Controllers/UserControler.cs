@@ -13,43 +13,43 @@ using Microsoft.AspNetCore.Mvc;
 namespace five_birds_be.Controllers
 {
     [ApiController]
-    [Route("api/v1/candidates")]
-    public class CandidateController : ControllerBase
+    [Route("api/v1/users")]
+    public class UserController : ControllerBase
     {
-        private readonly CandidateService _candidateService;
-        public CandidateController(CandidateService candidateService, DataContext datacontext)
+        private readonly UserService _userService;
+        public UserController(UserService userService, DataContext datacontext)
         {
-            _candidateService = candidateService;
+            _userService = userService;
         }
 
         [HttpGet("all/{pageNumber}")]
         [Authorize(Roles = "ROLE_ADMIN")]
-        public async Task<IActionResult> GetAllCandidate(int pageNumber)
+        public async Task<IActionResult> GetAllUser(int pageNumber)
         {
-            var candidate = await _candidateService.GetCandidatesPaged(pageNumber);
-            if (candidate == null || !candidate.Any())
-                return NotFound(ApiResponse<List<Candidate>>.Failure(404, "No candidate found"));
+            var user = await _userService.GetUserPaged(pageNumber);
+            if (user == null || !user.Any())
+                return NotFound(ApiResponse<List<User>>.Failure(404, "No user found"));
 
-            return Ok(ApiResponse<List<Candidate>>.Success(200, candidate, "Candidate retrieved successfully"));
+            return Ok(ApiResponse<List<User>>.Success(200, user, "user retrieved successfully"));
         }
 
 
         [HttpPost("register")]
         [Authorize(Roles = "ROLE_ADMIN")]
-        public async Task<IActionResult> Register([FromBody] CandidateDTO candidate)
+        public async Task<IActionResult> Register([FromBody] UserDTO user)
         {
-            var postCandidate = await _candidateService.Register(candidate);
+            var postUser = await _userService.Register(user);
 
-            if (postCandidate.ErrorCode == 400) return BadRequest(postCandidate);
+            if (postUser.ErrorCode == 400) return BadRequest(postUser);
 
-            return Ok(postCandidate);
+            return Ok(postUser);
         }
 
         [HttpPut("update")]
         [Authorize(Roles = "ROLE_ADMIN")]
-        public async Task<IActionResult> UpdateCandidate([FromBody] CandidateDTO candidate)
+        public async Task<IActionResult> UpdateUser([FromBody] UserDTO user)
         {
-            var data = await _candidateService.UpdateCandidate(candidate);
+            var data = await _userService.UpdateUser(user);
 
             if (data.ErrorCode == 404) return NotFound(data);
 
@@ -60,9 +60,9 @@ namespace five_birds_be.Controllers
 
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] CandidateLoginDTO candidateDTO)
+        public async Task<IActionResult> Login([FromBody] UserLoginDTO userDTO)
         {
-            var data = await _candidateService.Login(candidateDTO);
+            var data = await _userService.Login(userDTO);
 
             if (data.ErrorCode == 400) return BadRequest(data);
 
@@ -95,9 +95,9 @@ namespace five_birds_be.Controllers
 
         [HttpGet]
         [Authorize(Roles = "ROLE_ADMIN, ROLE_CANDIDATE")]
-        public async Task<IActionResult> GetCandidateById()
+        public async Task<IActionResult> GetUser()
         {
-            var data = await _candidateService.GetCandidateById();
+            var data = await _userService.GetUserById();
             if (data.ErrorCode == 404) BadRequest(data);
             if (data.ErrorCode == 400) BadRequest(data);
             return Ok(data);

@@ -18,9 +18,9 @@ namespace five_birds_be.Jwt
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
         }
 
-        public string GenerateJwtToken(Candidate candidate)
+        public string GenerateJwtToken(User user)
         {
-            if (candidate == null) throw new ArgumentNullException(nameof(candidate));
+            if (user == null) throw new ArgumentNullException(nameof(user));
 
             var jwtKey = _configuration["Jwt:Key"];
             if (string.IsNullOrEmpty(jwtKey))
@@ -33,8 +33,8 @@ namespace five_birds_be.Jwt
 
             var claims = new[]
             {
-                new Claim("Role", candidate.Role.ToString()),
-                new Claim("CandidateId", candidate.CandidateId.ToString()),
+                new Claim("Role", user.Role.ToString()),
+                new Claim("UserId", user.UserId.ToString()),
             };
 
             var token = new JwtSecurityToken(
@@ -46,7 +46,7 @@ namespace five_birds_be.Jwt
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        public int? GetCandidateIdFromHttpContext()
+        public int? GetUserIdFromHttpContext()
         {
             var token = _httpContextAccessor.HttpContext?.Request.Cookies["token"];
 
@@ -58,8 +58,8 @@ namespace five_birds_be.Jwt
             var handler = new JwtSecurityTokenHandler();
             var jwtToken = handler.ReadJwtToken(token);
 
-            var candidateIdClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "CandidateId");
-            if (candidateIdClaim != null && int.TryParse(candidateIdClaim.Value, out int userId))
+            var userIdClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "UserId");
+            if (userIdClaim != null && int.TryParse(userIdClaim.Value, out int userId))
             {
                 return userId;
             }

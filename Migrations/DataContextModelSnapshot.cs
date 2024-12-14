@@ -19,15 +19,11 @@ namespace five_birds_be.Migrations
                 .HasAnnotation("ProductVersion", "8.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
-            modelBuilder.Entity("five_birds_be.Models.Candidate", b =>
+            modelBuilder.Entity("five_birds_be.Models.User", b =>
                 {
-                    b.Property<int>("CandidateId")
+                    b.Property<int>("UserId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
-
-                    b.Property<string>("CandidateName")
-                        .IsRequired()
-                        .HasColumnType("longtext");
 
                     b.Property<DateTime>("Create_at")
                         .HasColumnType("datetime(6)");
@@ -46,9 +42,13 @@ namespace five_birds_be.Migrations
                     b.Property<DateTime>("Update_at")
                         .HasColumnType("datetime(6)");
 
-                    b.HasKey("CandidateId");
+                    b.Property<string>("UserName")
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
-                    b.ToTable("Candidate");
+                    b.HasKey("UserId");
+
+                    b.ToTable("User");
                 });
 #pragma warning restore 612, 618
         }

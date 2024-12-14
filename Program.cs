@@ -93,7 +93,7 @@ builder.Services.AddCors(options =>
 
 
 builder.WebHost.UseUrls("http://localhost:5005");
-builder.Services.AddScoped<CandidateService>();
+builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<CloudinaryService>();
 builder.Services.AddScoped<EmailService>();

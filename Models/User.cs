@@ -9,10 +9,10 @@ namespace five_birds_be.Models
         ROLE_ADMIN,
     }
 
-    public class Candidate
+    public class User
     {
-        public int CandidateId { get; set; }
-        public string CandidateName { get; set; }
+        public int UserId { get; set; }
+        public string UserName { get; set; }
         public string Password { get; set; }
         public string Email { get; set; }
 
