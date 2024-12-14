@@ -9,6 +9,8 @@ namespace five_birds_be.Data
 
         public DbSet<User> User { get; set; }
 
+        public DbSet<Candidate> Candidates { get; set; }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
         
