@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.AspNetCore.Authentication.Google;
+using five_birds_be.Servi;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,7 +22,9 @@ builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
     });
+
 
 
 builder.Services.AddAuthentication("Bearer")
@@ -90,10 +92,12 @@ builder.Services.AddCors(options =>
 
 
 
-
-
 builder.WebHost.UseUrls("http://localhost:5005");
 builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<ExamService>();
+builder.Services.AddScoped<QuestionService>();
+builder.Services.AddScoped<AnswerService>();
+
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<CloudinaryService>();
 builder.Services.AddScoped<EmailService>();

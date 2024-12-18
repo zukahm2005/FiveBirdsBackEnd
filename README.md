@@ -13,6 +13,9 @@ Project ATM Bank
 
 5. Migrations đồng bộ hoá Entities với MySql 
    dotnet ef migrations add InitialCreate  (nếu muốn tạo lại: dotnet restore)
+   
+   dotnet ef migrations add UpdateModel
+
 
 6. Áp dụng Migration để tạo Database 
     dotnet ef database update 
