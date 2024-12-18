@@ -11,7 +11,7 @@ using five_birds_be.Data;
 namespace five_birds_be.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20241217113151_InitialCreate")]
+    [Migration("20241218164235_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -62,6 +62,48 @@ namespace five_birds_be.Migrations
                     b.HasIndex("QuestionId");
 
                     b.ToTable("Answer");
+                });
+
+            modelBuilder.Entity("five_birds_be.Models.Candidate", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Education")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Experience")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Phone")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Candidates");
                 });
 
             modelBuilder.Entity("five_birds_be.Models.Exam", b =>
@@ -216,7 +258,7 @@ namespace five_birds_be.Migrations
             modelBuilder.Entity("five_birds_be.Models.Question", b =>
                 {
                     b.HasOne("five_birds_be.Models.Exam", "Exam")
-                        .WithMany("Questions")
+                        .WithMany("Question")
                         .HasForeignKey("ExamId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -261,7 +303,7 @@ namespace five_birds_be.Migrations
 
             modelBuilder.Entity("five_birds_be.Models.Exam", b =>
                 {
-                    b.Navigation("Questions");
+                    b.Navigation("Question");
                 });
 
             modelBuilder.Entity("five_birds_be.Models.Question", b =>

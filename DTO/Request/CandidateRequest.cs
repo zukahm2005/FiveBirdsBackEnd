@@ -15,6 +15,7 @@ namespace five_birds_be.DTO.Request
         public string Phone { get; set; }
 
         public string Education { get; set; }
+        
         public string Experience { get; set; }
 
         [Required]
