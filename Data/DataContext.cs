@@ -14,6 +14,8 @@ namespace five_birds_be.Data
         public DbSet<Result> Result { get; set; }
 
 
+        public DbSet<Candidate> Candidates { get; set; }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
         builder.Entity<Exam>()

@@ -19,12 +19,17 @@ namespace five_birds_be.Migrations
                 .HasAnnotation("ProductVersion", "8.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
+<<<<<<< HEAD
             modelBuilder.Entity("five_birds_be.Models.Answer", b =>
+=======
+            modelBuilder.Entity("five_birds_be.Models.Candidate", b =>
+>>>>>>> 517757bcb511a8ccb5e41d7a36e78d9b50420fd2
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
+<<<<<<< HEAD
                     b.Property<string>("Answer1")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -165,6 +170,42 @@ namespace five_birds_be.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Result");
+=======
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Education")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Experience")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Phone")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Candidates");
+>>>>>>> 517757bcb511a8ccb5e41d7a36e78d9b50420fd2
                 });
 
             modelBuilder.Entity("five_birds_be.Models.User", b =>

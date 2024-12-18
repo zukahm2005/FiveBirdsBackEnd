@@ -101,6 +101,7 @@ builder.Services.AddScoped<AnswerService>();
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<CloudinaryService>();
 builder.Services.AddScoped<EmailService>();
+builder.Services.AddScoped<ICandidateService, CandidateService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddMemoryCache();
 
