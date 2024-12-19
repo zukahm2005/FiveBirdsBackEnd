@@ -1,6 +1,7 @@
 using CloudinaryDotNet;
 using five_birds_be.Data;
 using five_birds_be.Dto;
+using five_birds_be.DTO.Response;
 using five_birds_be.Models;
 using five_birds_be.Response;
 using Microsoft.EntityFrameworkCore;
@@ -16,12 +17,16 @@ namespace five_birds_be.Services
             _dataContext = dataContext;
         }
 
-        public async Task<ApiResponse<string>> postAnswer(AnswerDTO answerDTO)
+        public async Task<ApiResponse<AnswerResponse>> postAnswer(AnswerDTO answerDTO)
         {
             var question = await _dataContext.Question
             .Include(a => a.Answers)
             .FirstOrDefaultAsync(a => a.Id == answerDTO.QuestionId);
-            if (question == null) { }
+            if (question == null) return ApiResponse<AnswerResponse>.Failure(404, "id not found");
+
+            var existingAnswer = question.Answers.FirstOrDefault();
+            if (existingAnswer != null)
+                return ApiResponse<AnswerResponse>.Failure(400, "Answer for this question already exists");
 
             var newAnswer = new Answer
             {
@@ -34,18 +39,31 @@ namespace five_birds_be.Services
                 CorrectAnswer = answerDTO.CorrectAnswer,
             };
 
+            var newAnswerResponse = new AnswerResponse
+            {
+                QuestionId = newAnswer.QuestionId,
+                QuestionExam = newAnswer.Question.QuestionExam,
+                Answer1 = newAnswer.Answer1,
+                Answer2 = newAnswer.Answer2,
+                Answer3 = newAnswer.Answer3,
+                Answer4 = newAnswer.Answer4,
+                CorrectAnswer = newAnswer.CorrectAnswer,
+            };
+
             await _dataContext.Answer.AddAsync(newAnswer);
             await _dataContext.SaveChangesAsync();
-            return new ApiResponse<string>(200, "create susscess", null);
+            return ApiResponse<AnswerResponse>.Success(200, newAnswerResponse, "create susscess");
         }
-        public async Task<List<Answer>> getAllAnswer(int pageNumber)
+        public async Task<ApiResponse<List<Answer>>> getAllAnswer(int pageNumber)
         {
             if (pageNumber < 1) pageNumber = 1;
 
-            return await _dataContext.Answer
+            var pageAnswer = await _dataContext.Answer
             .Skip((pageNumber - 1) * 10)
             .Take(10)
             .ToListAsync();
+
+            return ApiResponse<List<Answer>>.Success(200, pageAnswer, "get all success");
         }
 
         public async Task<ApiResponse<Answer>> getAnswerById(int id)
@@ -68,10 +86,10 @@ namespace five_birds_be.Services
             answer.Answer3 = answerDTO.Answer3;
             answer.Answer4 = answerDTO.Answer4;
             answer.CorrectAnswer = answerDTO.CorrectAnswer;
+            answer.Update_at = DateTime.Now;
 
             var newAnswerDto = new AnswerDTO
             {
-                Id = answer.Id,
                 QuestionId = answer.QuestionId,
                 Answer1 = answer.Answer1,
                 Answer2 = answer.Answer2,
@@ -82,7 +100,7 @@ namespace five_birds_be.Services
 
             await _dataContext.SaveChangesAsync();
 
-             return ApiResponse<AnswerDTO>.Success(200, newAnswerDto, "update answer success");
-         }
+            return ApiResponse<AnswerDTO>.Success(200, newAnswerDto, "update answer success");
+        }
     }
 }

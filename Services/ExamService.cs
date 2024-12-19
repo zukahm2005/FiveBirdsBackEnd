@@ -1,5 +1,6 @@
 using five_birds_be.Data;
 using five_birds_be.Dto;
+using five_birds_be.DTO.Response;
 using five_birds_be.Models;
 using five_birds_be.Response;
 using Microsoft.EntityFrameworkCore;
@@ -29,41 +30,108 @@ namespace five_birds_be.Servi
             return ApiResponse<Exam>.Success(200, newExam, "create success");
         }
 
-        public async Task<List<Exam>> getAllExam(int pageNumber)
+        public async Task<ApiResponse<List<ExamResponse>>> getAllExam(int pageNumber)
         {
             if (pageNumber < 1) pageNumber = 1;
 
-            return await _dataContext.Exam
+            var pageExam = await _dataContext.Exam
             .Include(exam => exam.Question)
             .ThenInclude(question => question.Answers)
             .Skip((pageNumber - 1) * 10)
             .Take(10)
             .ToListAsync();
+
+            var examResponses = pageExam.Select(exam => new ExamResponse
+            {
+                Id = exam.Id,
+                Title = exam.Title,
+                Description = exam.Description,
+                Duration = exam.Duration,
+                Question = exam.Question.Select(q => new QuestionResponse
+                {
+                    Id = q.Id,
+                    ExamId = q.ExamId,
+                    TitleExam = q.Exam.Title,
+                    QuestionExam = q.QuestionExam,
+                    Point = q.Point,
+                    Answers = q.Answers.Select(a => new AnswerResponse
+                    {
+                        Id = a.Id,
+                        QuestionId = a.QuestionId,
+                        QuestionExam = a.Question.QuestionExam,
+                        Answer1 = a.Answer1,
+                        Answer2 = a.Answer2,
+                        Answer3 = a.Answer3,
+                        Answer4 = a.Answer4,
+                        CorrectAnswer = a.CorrectAnswer
+                    }).ToList()
+                }).ToList()
+            }).ToList();
+
+            return ApiResponse<List<ExamResponse>>.Success(200, examResponses, "get all success");
         }
 
-        public async Task<ApiResponse<Exam>> getExamById(int Id){
+        public async Task<ApiResponse<ExamResponse>> getExamById(int Id)
+        {
             var exam = await _dataContext.Exam
-            .Include(exam => exam.Question)
-            .ThenInclude(question => question.Answers)
-            .FirstOrDefaultAsync(c => c.Id == Id);
+                .Include(exam => exam.Question)
+                .ThenInclude(question => question.Answers)
+                .FirstOrDefaultAsync(c => c.Id == Id);
 
-            if (exam == null) return ApiResponse<Exam>.Failure(404, "id exam not found");
+            if (exam == null)
+                return ApiResponse<ExamResponse>.Failure(404, "id exam not found");
 
-            return  ApiResponse<Exam>.Success(200, exam, "find success");
+            var examResponse = new ExamResponse
+            {
+                Id = exam.Id,
+                Title = exam.Title,
+                Description = exam.Description,
+                Duration = exam.Duration,
+                Question = exam.Question.Select(q => new QuestionResponse
+                {
+                    Id = q.Id,
+                    ExamId = q.ExamId,
+                    TitleExam = q.Exam.Title,
+                    QuestionExam = q.QuestionExam,
+                    Point = q.Point,
+                    Answers = q.Answers.Select(a => new AnswerResponse
+                    {
+                        Id = a.Id,
+                        QuestionId = a.QuestionId,
+                        QuestionExam = a.Question.QuestionExam,
+                        Answer1 = a.Answer1,
+                        Answer2 = a.Answer2,
+                        Answer3 = a.Answer3,
+                        Answer4 = a.Answer4,
+                        CorrectAnswer = a.CorrectAnswer
+                    }).ToList()
+                }).ToList()
+            };
+
+            return ApiResponse<ExamResponse>.Success(200, examResponse, "find success");
         }
 
-        public async Task<ApiResponse<ExamDTO>> updateExam(int Id, ExamDTO examDTO){
+        public async Task<ApiResponse<ExamResponse>> updateExam(int Id, ExamDTO examDTO)
+        {
             var exam = await _dataContext.Exam.FindAsync(Id);
-            if (exam == null) return  ApiResponse<ExamDTO>.Failure(404, "id exam notfound");
+            if (exam == null) return ApiResponse<ExamResponse>.Failure(404, "id exam notfound");
 
             exam.Id = Id;
             exam.Title = examDTO.Title;
             exam.Description = examDTO.Description;
             exam.Duration = examDTO.Duration;
+            exam.Update_at = DateTime.Now;
+
+            var newExamDto = new ExamResponse
+            {
+                Title = exam.Title,
+                Description = exam.Description,
+                Duration = examDTO.Duration,
+            };
 
             await _dataContext.SaveChangesAsync();
 
-            return  ApiResponse<ExamDTO>.Success(200, null, "update exam success");
+            return ApiResponse<ExamResponse>.Success(200, newExamDto, "update exam success");
         }
     }
 }

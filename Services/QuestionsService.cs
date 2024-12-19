@@ -1,6 +1,7 @@
 using CloudinaryDotNet;
 using five_birds_be.Data;
 using five_birds_be.Dto;
+using five_birds_be.DTO.Response;
 using five_birds_be.Models;
 using five_birds_be.Response;
 using Microsoft.EntityFrameworkCore;
@@ -15,15 +16,17 @@ namespace five_birds_be.Services
         {
             _dataContext = dataContext;
         }
-        public async Task<ApiResponse<string>> postQuestion(QuestionDTO questionDTO)
+        public async Task<ApiResponse<Question>> postQuestion(QuestionDTO questionDTO)
         {
             var questionWithExam = await _dataContext.Exam
             .FirstOrDefaultAsync(e => e.Id == questionDTO.ExamId);
 
-            if (questionWithExam == null) return new ApiResponse<string>(404, "exam not found", null);
+            if (questionWithExam == null) return  ApiResponse<Question>.Failure(404, "exam not found");
 
-            Console.WriteLine("sdfs" + questionWithExam);
+            var question = await _dataContext.Question
+            .FirstOrDefaultAsync(e => e.QuestionExam == questionDTO.QuestionExam && e.ExamId == questionDTO.ExamId);
 
+            if (question != null) return ApiResponse<Question>.Failure(400, "question already existed ");
 
             var newQuestion = new Question
             {
@@ -34,17 +37,19 @@ namespace five_birds_be.Services
             };
             await _dataContext.Question.AddAsync(newQuestion);
             await _dataContext.SaveChangesAsync();
-            return new ApiResponse<string>(200, "create susscess", null);
+            return  ApiResponse<Question>.Success(200, newQuestion,  "create success");
         }
 
-        public async Task<List<Question>> getALlQuestion(int pageNumber)
+        public async Task<ApiResponse<List<Question>>> getALlQuestion(int pageNumber)
         {
             if (pageNumber < 1) pageNumber = 1;
 
-            return await _dataContext.Question
+            var pageQuestion = await _dataContext.Question
             .Skip((pageNumber - 1) * 10)
             .Take(10)
             .ToListAsync();
+
+            return ApiResponse<List<Question>>.Success(200, pageQuestion, "get all success");
         }
 
         public async Task<ApiResponse<Question>> GetQuestionById(int id){
@@ -57,15 +62,16 @@ namespace five_birds_be.Services
             return ApiResponse<Question>.Success(200, question, "get by id question success");
         }
 
-        public async Task<ApiResponse<QuestionDTO>> updateQuestion(int id, QuestionDTO questionDTO){
+        public async Task<ApiResponse<QuestionResponse>> updateQuestion(int id, QuestionDTO questionDTO){
             var question = await _dataContext.Question.FindAsync(id);
-            if (question == null) return ApiResponse<QuestionDTO>.Failure(400, "id question not found");
+            if (question == null) return ApiResponse<QuestionResponse>.Failure(400, "id question not found");
 
             question.ExamId = questionDTO.ExamId;
             question.QuestionExam = questionDTO.QuestionExam;
             question.Point = questionDTO.Point;
+            question.Update_at = DateTime.Now;
 
-            var newQuestionDTO = new QuestionDTO{
+            var newQuestionDTO = new QuestionResponse{
                 ExamId = question.ExamId,
                 QuestionExam = question.QuestionExam,
                 Point = questionDTO.Point,
@@ -73,7 +79,7 @@ namespace five_birds_be.Services
 
             await _dataContext.SaveChangesAsync();
 
-            return ApiResponse<QuestionDTO>.Success(200, newQuestionDTO, "update question success");
+            return ApiResponse<QuestionResponse>.Success(200, newQuestionDTO, "update question success");
         }
     }
 }
