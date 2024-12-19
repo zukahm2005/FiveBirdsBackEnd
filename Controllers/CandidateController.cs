@@ -16,8 +16,9 @@ namespace five_birds_be.Controllers
             _candidateService = candidateService;
         }
 
+
         [HttpPost]
-        public async Task<IActionResult> CreateCandidate([FromBody] CandidateRequest request)
+        public async Task<IActionResult> CreateCandidate([FromForm] CandidateRequest request)
         {
             var response = await _candidateService.CreateCandidateAsync(request);
             if (response.ErrorCode != 200)

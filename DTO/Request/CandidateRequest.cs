@@ -17,13 +17,8 @@ namespace five_birds_be.DTO.Request
         public string Education { get; set; }
         
         public string Experience { get; set; }
-
         [Required]
-        public string Username { get; set; }
-
-        [Required]
-        [MinLength(6)]
-        public string Password { get; set; }
+        public IFormFile CvFile { get; set; }   
     }
 
 }

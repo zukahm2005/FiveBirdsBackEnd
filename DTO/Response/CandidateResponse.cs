@@ -7,7 +7,6 @@ namespace five_birds_be.DTO.Response {
         public string Phone { get; set; }
         public string Education { get; set; }
         public string Experience { get; set; }
-        public string Username { get; set; }
         public DateTime CreatedAt { get; set; }
     }
 }

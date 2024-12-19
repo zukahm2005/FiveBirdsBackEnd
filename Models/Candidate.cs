@@ -8,8 +8,7 @@ namespace five_birds_be.Models
         public string Phone { get; set; }
         public string Education { get; set; }
         public string Experience { get; set; }
-        public string Username { get; set; }
-        public string Password { get; set; }
+        public string CvFilePath { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
     }
 }

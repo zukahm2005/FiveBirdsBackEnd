@@ -102,6 +102,7 @@ builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<CloudinaryService>();
 builder.Services.AddScoped<EmailService>();
 builder.Services.AddScoped<ICandidateService, CandidateService>();
+builder.Services.AddSingleton<IWebHostEnvironment>(builder.Environment); 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddMemoryCache();
 
@@ -116,6 +117,7 @@ var app = builder.Build();
 app.UseCors("AllowReactClient");
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseStaticFiles();
 
 
 app.UseSwagger();

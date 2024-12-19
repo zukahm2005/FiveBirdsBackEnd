@@ -19,17 +19,40 @@ namespace five_birds_be.Services
     public class CandidateService : ICandidateService
     {
         private readonly DataContext _context;
+        private readonly IWebHostEnvironment _env;
 
-        public CandidateService(DataContext context)
+        public CandidateService(DataContext context, IWebHostEnvironment env)
         {
             _context = context;
+            _env = env;
         }
 
         public async Task<ApiResponse<string>> CreateCandidateAsync(CandidateRequest request)
         {
-            if (_context.Candidates.Any(c => c.Username == request.Username))
+            string filePath = null;
+            if (request.CvFile != null)
             {
-                return ApiResponse<string>.Failure(400, "Username đã tồn tại. Vui lòng chọn tên đăng nhập khác.");
+                var allowedExtensions = new[] { ".pdf", ".jpg", ".jpeg", ".png" };
+                var fileExtension = Path.GetExtension(request.CvFile.FileName).ToLower();
+
+                if (!allowedExtensions.Contains(fileExtension))
+                {
+                    return ApiResponse<string>.Failure(400, "File CV phải là PDF hoặc hình ảnh.");
+                }
+
+                var uploadsFolder = Path.Combine(_env.WebRootPath, "uploads");
+                if (!Directory.Exists(uploadsFolder))
+                {
+                    Directory.CreateDirectory(uploadsFolder);
+                }
+
+                var uniqueFileName = $"{Guid.NewGuid()}{fileExtension}";
+                filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await request.CvFile.CopyToAsync(fileStream);
+                }
             }
 
             var candidate = new Candidate
@@ -39,14 +62,12 @@ namespace five_birds_be.Services
                 Phone = request.Phone,
                 Education = request.Education,
                 Experience = request.Experience,
-                Username = request.Username,
-                Password = BCrypt.Net.BCrypt.HashPassword(request.Password),
-                CreatedAt = DateTime.Now
+                CvFilePath = filePath
             };
 
             _context.Candidates.Add(candidate);
             await _context.SaveChangesAsync();
-            return ApiResponse<string>.Success(200, "Hồ sơ ứng viên đã được tạo thành công.");
+            return ApiResponse<string>.Success(200, "Send successfuly.");
         }
 
         public async Task<ApiResponse<List<CandidateResponse>>> GetCandidatesAsync()
@@ -60,7 +81,6 @@ namespace five_birds_be.Services
                     Phone = c.Phone,
                     Education = c.Education,
                     Experience = c.Experience,
-                    Username = c.Username,
                     CreatedAt = c.CreatedAt
                 })
                 .ToListAsync();
@@ -72,7 +92,7 @@ namespace five_birds_be.Services
         {
             var candidate = await _context.Candidates.FindAsync(id);
             if (candidate == null)
-                return ApiResponse<CandidateResponse>.Failure(404, "Ứng viên không tồn tại.");
+                return ApiResponse<CandidateResponse>.Failure(404, "Candidate not found.");
 
             var response = new CandidateResponse
             {
@@ -82,7 +102,6 @@ namespace five_birds_be.Services
                 Phone = candidate.Phone,
                 Education = candidate.Education,
                 Experience = candidate.Experience,
-                Username = candidate.Username,
                 CreatedAt = candidate.CreatedAt
             };
 
@@ -100,11 +119,6 @@ namespace five_birds_be.Services
             candidate.Phone = request.Phone;
             candidate.Education = request.Education;
             candidate.Experience = request.Experience;
-            candidate.Username = request.Username;
-            if (!string.IsNullOrEmpty(request.Password))
-            {
-                candidate.Password = BCrypt.Net.BCrypt.HashPassword(request.Password);
-            }
 
             _context.Candidates.Update(candidate);
             await _context.SaveChangesAsync();
