@@ -28,7 +28,7 @@ namespace five_birds_be.Controllers
         {
             var exam = await _examService.getAllExam(pageNumber);
             if (exam == null) return NotFound(ApiResponse<Exam>.Failure(404, "No exam found"));
-            return Ok(ApiResponse<List<Exam>>.Success(200, exam, "Exam retrieved successfully"));
+            return Ok(exam);
         }
 
         [HttpGet("get/{id}")]

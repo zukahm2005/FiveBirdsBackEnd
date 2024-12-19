@@ -29,7 +29,7 @@ namespace five_birds_be.Controllers
         [HttpGet("get/all/{pageNumber}")]
         public async Task<IActionResult> getAll(int pageNumber){
             var question = await _questionService.getALlQuestion(pageNumber);
-            return Ok(ApiResponse<List<Question>>.Success(200, question, "question retrieved successfully"));
+            return Ok(question);
         }
 
         [HttpGet("get/{id}")]

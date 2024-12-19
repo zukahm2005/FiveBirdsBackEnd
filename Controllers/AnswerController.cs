@@ -12,8 +12,8 @@ namespace five_birds_be.Dto{
 
         [HttpPost("add")]
         public async Task<ActionResult> post([FromBody] AnswerDTO answerDTO){
-            await _answerService.postAnswer(answerDTO);
-            return Ok();
+            var postAnswer = await _answerService.postAnswer(answerDTO);
+            return Ok(postAnswer);
         }
 
         [HttpGet("get/all/{pageNumber}")]
