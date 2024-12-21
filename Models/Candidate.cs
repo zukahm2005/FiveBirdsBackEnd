@@ -10,5 +10,10 @@ namespace five_birds_be.Models
         public string Experience { get; set; }
         public string CvFilePath { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
+
+
+        public int UserId { get; set; }
+
+        public User User { get; set; }
     }
 }

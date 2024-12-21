@@ -11,8 +11,8 @@ using five_birds_be.Data;
 namespace five_birds_be.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20241218164235_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20241221033216_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -73,6 +73,10 @@ namespace five_birds_be.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<string>("CvFilePath")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
                     b.Property<string>("Education")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -89,19 +93,17 @@ namespace five_birds_be.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<string>("Password")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
                     b.Property<string>("Phone")
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<string>("Username")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
 
                     b.ToTable("Candidates");
                 });
@@ -255,6 +257,17 @@ namespace five_birds_be.Migrations
                     b.Navigation("Question");
                 });
 
+            modelBuilder.Entity("five_birds_be.Models.Candidate", b =>
+                {
+                    b.HasOne("five_birds_be.Models.User", "User")
+                        .WithOne("Candidate")
+                        .HasForeignKey("five_birds_be.Models.Candidate", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("five_birds_be.Models.Question", b =>
                 {
                     b.HasOne("five_birds_be.Models.Exam", "Exam")
@@ -309,6 +322,12 @@ namespace five_birds_be.Migrations
             modelBuilder.Entity("five_birds_be.Models.Question", b =>
                 {
                     b.Navigation("Answers");
+                });
+
+            modelBuilder.Entity("five_birds_be.Models.User", b =>
+                {
+                    b.Navigation("Candidate")
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

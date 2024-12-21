@@ -30,6 +30,7 @@ namespace five_birds_be.Services
         public async Task<ApiResponse<string>> CreateCandidateAsync(CandidateRequest request)
         {
             string filePath = null;
+
             if (request.CvFile != null)
             {
                 var allowedExtensions = new[] { ".pdf", ".jpg", ".jpeg", ".png" };
@@ -55,6 +56,29 @@ namespace five_birds_be.Services
                 }
             }
 
+            var emailPrefix = request.Email.Split('@')[0];
+            var existingUser = await _context.User.FirstOrDefaultAsync(u => u.UserName == emailPrefix);
+            string username = emailPrefix;
+
+            if (existingUser != null)
+            {
+                username = $"{emailPrefix}_{new Random().Next(1000, 9999)}";
+            }
+
+            var randomPassword = GenerateRandomPassword();
+            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(randomPassword);
+
+            var user = new User
+            {
+                UserName = username,
+                Password = hashedPassword,
+                Email = request.Email,
+                Role = Role.ROLE_CANDIDATE
+            };
+
+            _context.User.Add(user);
+            await _context.SaveChangesAsync();
+
             var candidate = new Candidate
             {
                 FullName = request.FullName,
@@ -62,13 +86,40 @@ namespace five_birds_be.Services
                 Phone = request.Phone,
                 Education = request.Education,
                 Experience = request.Experience,
-                CvFilePath = filePath
+                CvFilePath = filePath,
+                UserId = user.UserId
             };
 
             _context.Candidates.Add(candidate);
             await _context.SaveChangesAsync();
-            return ApiResponse<string>.Success(200, "Send successfuly.");
+
+            string adminEmail = "maituanvu141@gmail.com";
+            string emailSubject = "Thông báo: Có người nộp CV mới";
+            string emailBody = $@"
+        <h2>Thông tin ứng viên mới</h2>
+        <p><strong>Họ tên:</strong> {request.FullName}</p>
+        <p><strong>Email:</strong> {request.Email}</p>
+        <p><strong>Username:</strong> {username}</p>
+        <p><strong>Password:</strong> {randomPassword}</p>
+        <p>File CV đã được tải lên: <a href='{filePath}'>Tải xuống CV</a></p>
+    ";
+
+            var emailService = new EmailService();
+            await emailService.SendEmailAsync(adminEmail, emailSubject, emailBody);
+
+            return ApiResponse<string>.Success(200, "Send success");
         }
+
+        private string GenerateRandomPassword()
+        {
+            var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()";
+            var random = new Random();
+            var password = new string(Enumerable.Repeat(chars, 10)
+                .Select(s => s[random.Next(s.Length)]).ToArray());
+
+            return password;
+        }
+
 
         public async Task<ApiResponse<List<CandidateResponse>>> GetCandidatesAsync()
         {

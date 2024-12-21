@@ -28,6 +28,11 @@ namespace five_birds_be.Data
         .WithOne(e => e.Question)
         .HasForeignKey(e => e.QuestionId);
 
+        builder.Entity<User>()
+        .HasOne(u => u.Candidate)
+        .WithOne(u => u.User)
+        .HasForeignKey<Candidate>(c => c.UserId)
+        .OnDelete(DeleteBehavior.Cascade);
         }
     }
 

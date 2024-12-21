@@ -18,5 +18,7 @@ namespace five_birds_be.Models
 
         [JsonConverter(typeof(StringEnumConverter))]
         public Role Role { get; set; } = Role.ROLE_CANDIDATE;
+
+        public Candidate Candidate { get; set; }
     }
 }
