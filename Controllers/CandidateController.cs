@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace five_birds_be.Controllers
 {
     [ApiController]
-    [Route("api/candidates")]
+    [Route("api/v1/candidates")]
     public class CandidateController : ControllerBase
     {
         private readonly ICandidateService _candidateService;
