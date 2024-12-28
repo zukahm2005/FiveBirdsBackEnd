@@ -29,11 +29,11 @@ namespace five_birds_be.Controllers
 
         }
 
-        [HttpGet("get/all/{pageNumber}")]
+        [HttpGet("get/all/")]
         [Authorize(Roles = "ROLE_ADMIN")]
-        public async Task<IActionResult> getAll(int pageNumber)
+        public async Task<IActionResult> getAll(int pageNumber, int pageSize)
         {
-            var question = await _questionService.getALlQuestion(pageNumber);
+            var question = await _questionService.getALlQuestion(pageNumber, pageSize);
             return Ok(question);
         }
 

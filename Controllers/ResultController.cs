@@ -1,6 +1,7 @@
 using five_birds_be.Dto;
 using five_birds_be.Models;
 using five_birds_be.Services;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace five_birds_be.Controllers
@@ -19,6 +20,7 @@ namespace five_birds_be.Controllers
         public async Task<ActionResult> add(ResultDTO result)
         {
             var data = await _resultService.PostResult(result);
+            if (data.ErrorCode == 400) return BadRequest(data);
             return Ok(data);
 
         }
@@ -32,6 +34,7 @@ namespace five_birds_be.Controllers
         public async Task<ActionResult> getAllById(int id)
         {
             var result = await _resultService.GetById(id);
+            if (result.ErrorCode == 404) return  NotFound(result);
             return Ok(result);
         }
     }

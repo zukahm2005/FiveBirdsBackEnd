@@ -29,13 +29,13 @@ namespace five_birds_be.Services
 
         }
 
-        public async Task<List<User>> GetUserPaged(int pageNumber)
+        public async Task<List<User>> GetUserPaged(int pageNumber, int pageSize)
         {
             if (pageNumber < 1) pageNumber = 1;
 
             return await _dataContext.User
                 .Skip((pageNumber - 1) * 10)
-                .Take(10)
+                .Take(pageSize)
                 .ToListAsync();
         }
 

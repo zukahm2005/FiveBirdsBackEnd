@@ -20,6 +20,20 @@ namespace five_birds_be.Controllers
         public async Task<IActionResult> post(CandidateTestDTO candidateTest)
         {
             var data = await _candidateTestService.addCandidateTest(candidateTest);
+            if (data.ErrorCode == 400) return BadRequest(data);
+            return Ok(data);
+        }
+
+        [HttpGet("get/{id}")]
+        public async Task<IActionResult> getById(int id){
+            var data = await _candidateTestService.GetCandidateTestResultByIdAsync(id);
+            if (data.ErrorCode == 404) return NotFound(data);
+            return Ok(data);
+        }
+
+        [HttpGet("get/all")]
+        public async Task<IActionResult> getAll (int pageNumber, int pageSize){
+            var data = await _candidateTestService.GetAll(pageNumber, pageSize);
             return Ok(data);
         }
     }

@@ -20,6 +20,17 @@ namespace five_birds_be.Services
 
         public async Task<ApiResponse<ResultResponse>> PostResult(ResultDTO resultDTO)
         {
+            var existingResult = await _dataContext.Result
+         .FirstOrDefaultAsync(r => r.UserId == resultDTO.UserId
+                                   && r.ExamId == resultDTO.ExamId
+                                   && r.QuestionId == resultDTO.QuestionId);
+
+            if (existingResult != null)
+            {
+                return ApiResponse<ResultResponse>.Failure(400, "User has already answered this question.");
+            }
+
+
             var dataUser = await _dataContext.User.FirstOrDefaultAsync(u => u.UserId == resultDTO.UserId);
             if (dataUser == null) return ApiResponse<ResultResponse>.Failure(400, "Invalid dataUser provided.");
 
@@ -107,7 +118,7 @@ namespace five_birds_be.Services
                 })
                 .ToListAsync();
 
-            return ApiResponse<object>.Success(200, results, "create success");
+            return ApiResponse<object>.Success(200, results, "get all success");
         }
 
         public async Task<ApiResponse<object>> GetById(int resultId)

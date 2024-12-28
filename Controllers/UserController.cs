@@ -22,11 +22,11 @@ namespace five_birds_be.Controllers
             _userService = userService;
         }
 
-        [HttpGet("all/{pageNumber}")]
+        [HttpGet("get/all")]
         [Authorize(Roles = "ROLE_ADMIN")]
-        public async Task<IActionResult> GetAllUser(int pageNumber)
+        public async Task<IActionResult> GetAllUser(int pageNumber, int pageSize)
         {
-            var user = await _userService.GetUserPaged(pageNumber);
+            var user = await _userService.GetUserPaged(pageNumber, pageSize);
             if (user == null || !user.Any())
                 return NotFound(ApiResponse<List<User>>.Failure(404, "No user found"));
 

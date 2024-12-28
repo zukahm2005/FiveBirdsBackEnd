@@ -25,29 +25,29 @@ namespace five_birds_be.Controllers
             return Ok(exam);
         }
 
-        [HttpGet("get/all/{pageNumber}")]
+        [HttpGet("get/all")]
         [Authorize(Roles = "ROLE_ADMIN")]
-        public async Task<IActionResult> getAll(int pageNumber)
+        public async Task<IActionResult> getAll(int pageNumber, int pageSize)
         {
-            var exam = await _examService.getAllExam(pageNumber);
+            var exam = await _examService.getAllExam(pageNumber, pageSize);
             if (exam == null) return NotFound(ApiResponse<Exam>.Failure(404, "No exam found"));
             return Ok(exam);
         }
 
         [HttpGet("get/{id}")]
         [Authorize(Roles = "ROLE_ADMIN, ROLE_CANDIDATE")]
-        public async Task<IActionResult> getById(int Id)
+        public async Task<IActionResult> getById(int id)
         {
-            var exam = await _examService.getExamById(Id);
+            var exam = await _examService.getExamById(id);
             if (exam.ErrorCode == 404) return NotFound(exam);
             return Ok(exam);
         }
 
         [HttpPut("update/{id}")]
         [Authorize(Roles = "ROLE_ADMIN")]
-        public async Task<IActionResult> putExam(int Id, [FromBody] ExamDTO examDTO)
+        public async Task<IActionResult> putExam(int id, [FromBody] ExamDTO examDTO)
         {
-            var exam = await _examService.updateExam(Id, examDTO);
+            var exam = await _examService.updateExam(id, examDTO);
             if (exam.ErrorCode == 404) return NotFound(exam);
             return Ok(exam);
         }

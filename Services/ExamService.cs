@@ -30,7 +30,7 @@ namespace five_birds_be.Servi
             return ApiResponse<Exam>.Success(200, newExam, "create success");
         }
 
-        public async Task<ApiResponse<List<ExamResponse>>> getAllExam(int pageNumber)
+        public async Task<ApiResponse<List<ExamResponse>>> getAllExam(int pageNumber, int pageSize)
         {
             if (pageNumber < 1) pageNumber = 1;
 
@@ -38,7 +38,7 @@ namespace five_birds_be.Servi
             .Include(exam => exam.Question)
             .ThenInclude(question => question.Answers)
             .Skip((pageNumber - 1) * 10)
-            .Take(10)
+            .Take(pageSize)
             .ToListAsync();
 
             var examResponses = pageExam.Select(exam => new ExamResponse
@@ -51,7 +51,6 @@ namespace five_birds_be.Servi
                 {
                     Id = q.Id,
                     ExamId = q.ExamId,
-                    TitleExam = q.Exam.Title,
                     QuestionExam = q.QuestionExam,
                     Point = q.Point,
                     Answers = q.Answers.Select(a => new AnswerResponse
@@ -91,7 +90,6 @@ namespace five_birds_be.Servi
                 {
                     Id = q.Id,
                     ExamId = q.ExamId,
-                    TitleExam = q.Exam.Title,
                     QuestionExam = q.QuestionExam,
                     Point = q.Point,
                     Answers = q.Answers.Select(a => new AnswerResponse

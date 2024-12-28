@@ -39,8 +39,12 @@ namespace five_birds_be.Services
                 CorrectAnswer = answerDTO.CorrectAnswer,
             };
 
+            await _dataContext.Answer.AddAsync(newAnswer);
+            await _dataContext.SaveChangesAsync();
+
             var newAnswerResponse = new AnswerResponse
             {
+                Id = newAnswer.Id,
                 QuestionId = newAnswer.QuestionId,
                 QuestionExam = newAnswer.Question.QuestionExam,
                 Answer1 = newAnswer.Answer1,
@@ -50,17 +54,15 @@ namespace five_birds_be.Services
                 CorrectAnswer = newAnswer.CorrectAnswer,
             };
 
-            await _dataContext.Answer.AddAsync(newAnswer);
-            await _dataContext.SaveChangesAsync();
             return ApiResponse<AnswerResponse>.Success(200, newAnswerResponse, "create susscess");
         }
-        public async Task<ApiResponse<List<Answer>>> getAllAnswer(int pageNumber)
+        public async Task<ApiResponse<List<Answer>>> getAllAnswer(int pageNumber, int pageSize)
         {
             if (pageNumber < 1) pageNumber = 1;
 
             var pageAnswer = await _dataContext.Answer
             .Skip((pageNumber - 1) * 10)
-            .Take(10)
+            .Take(pageSize)
             .ToListAsync();
 
             return ApiResponse<List<Answer>>.Success(200, pageAnswer, "get all success");

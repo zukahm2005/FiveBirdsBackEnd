@@ -22,11 +22,11 @@ namespace five_birds_be.Dto
             return Ok(postAnswer);
         }
 
-        [HttpGet("get/all/{pageNumber}")]
+        [HttpGet("get/all")]
         [Authorize(Roles = "ROLE_ADMIN")]
-        public async Task<IActionResult> getAll(int pageNumber)
+        public async Task<IActionResult> getAll(int pageNumber, int pageSize)
         {
-            var answer = await _answerService.getAllAnswer(pageNumber);
+            var answer = await _answerService.getAllAnswer(pageNumber, pageSize);
             return Ok(answer);
         }
 
