@@ -9,6 +9,6 @@ namespace five_birds_be.DTO.Response
         public string Answer2 { get; set; }
         public string Answer3 { get; set; }
         public string Answer4 { get; set; }
-        public string CorrectAnswer { get; set; }
+        public int CorrectAnswer { get; set; }
     }
 }

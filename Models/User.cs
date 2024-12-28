@@ -9,7 +9,7 @@ namespace five_birds_be.Models
         ROLE_ADMIN,
     }
 
-    public class User: DateTimes
+    public class User : DateTimes
     {
         public int UserId { get; set; }
         public string UserName { get; set; }
@@ -18,5 +18,10 @@ namespace five_birds_be.Models
 
         [JsonConverter(typeof(StringEnumConverter))]
         public Role Role { get; set; } = Role.ROLE_CANDIDATE;
+
+        public List<Result> Results { get; set; } = new List<Result>();
+
+        public List<CandidateTest> CandidateTests { get; set; } = new List<CandidateTest>();
+
     }
 }

@@ -2,6 +2,7 @@ using five_birds_be.Dto;
 using five_birds_be.Models;
 using five_birds_be.Response;
 using five_birds_be.Servi;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace five_birds_be.Controllers
@@ -17,6 +18,7 @@ namespace five_birds_be.Controllers
         }
 
         [HttpPost("add")]
+        [Authorize(Roles = "ROLE_ADMIN")]
         public async Task<IActionResult> createExam([FromBody] ExamDTO examDTO)
         {
             var exam = await _examService.CreateExam(examDTO);
@@ -24,6 +26,7 @@ namespace five_birds_be.Controllers
         }
 
         [HttpGet("get/all/{pageNumber}")]
+        [Authorize(Roles = "ROLE_ADMIN")]
         public async Task<IActionResult> getAll(int pageNumber)
         {
             var exam = await _examService.getAllExam(pageNumber);
@@ -32,6 +35,7 @@ namespace five_birds_be.Controllers
         }
 
         [HttpGet("get/{id}")]
+        [Authorize(Roles = "ROLE_ADMIN, ROLE_CANDIDATE")]
         public async Task<IActionResult> getById(int Id)
         {
             var exam = await _examService.getExamById(Id);
@@ -40,6 +44,7 @@ namespace five_birds_be.Controllers
         }
 
         [HttpPut("update/{id}")]
+        [Authorize(Roles = "ROLE_ADMIN")]
         public async Task<IActionResult> putExam(int Id, [FromBody] ExamDTO examDTO)
         {
             var exam = await _examService.updateExam(Id, examDTO);

@@ -97,6 +97,9 @@ builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<ExamService>();
 builder.Services.AddScoped<QuestionService>();
 builder.Services.AddScoped<AnswerService>();
+builder.Services.AddScoped<ResultService>();
+builder.Services.AddScoped<CandidateTestService>();
+
 
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<CloudinaryService>();

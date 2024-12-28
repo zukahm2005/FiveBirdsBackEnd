@@ -7,6 +7,7 @@ namespace five_birds_be.Models
         public string Description { get; set; }
         public string Duration { get; set; }
         public List<Question> Question { get; set; } = new List<Question>();
+        public List<CandidateTest> CandidateTests { get; set; } = new List<CandidateTest>();
 
     }
 }

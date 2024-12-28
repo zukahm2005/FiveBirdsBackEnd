@@ -5,6 +5,6 @@ namespace five_birds_be.Dto{
         public string Answer2 { get; set; }
         public string Answer3 { get; set; }
         public string Answer4 { get; set; }
-        public string CorrectAnswer { get; set; }
+        public int CorrectAnswer { get; set; }
     }
 }
