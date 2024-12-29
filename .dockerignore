@@ -1,0 +1,17 @@
+bin/
+obj/
+out/
+Migrations/
+wwwroot/
+
+*.user
+*.lock
+*.tmp
+*.log
+.vscode/
+.idea/
+
+.git/
+.gitignore
+
+appsettings.Development.json

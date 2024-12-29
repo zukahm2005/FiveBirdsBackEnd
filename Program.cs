@@ -84,15 +84,15 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactClient",
-        policy => policy.WithOrigins("http://localhost:5173")
+        policy => policy.WithOrigins()
                         .AllowAnyHeader()
-                        .AllowAnyMethod()
-                        .AllowCredentials());
+                        .AllowAnyMethod());
+                        // .AllowCredentials());
 });
 
 
 
-builder.WebHost.UseUrls("http://localhost:5005");
+builder.WebHost.UseUrls("http://0.0.0.0:5005");
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<ExamService>();
 builder.Services.AddScoped<QuestionService>();
@@ -129,6 +129,6 @@ app.UseSwaggerUI(c =>
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "API Documentation V1");
     c.RoutePrefix = string.Empty;
 });
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
 app.MapControllers();
 app.Run();
