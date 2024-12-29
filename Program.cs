@@ -83,8 +83,8 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowReactClient",
-        policy => policy.WithOrigins()
+    options.AddPolicy("AllowAll",
+        policy => policy.AllowAnyOrigin()
                         .AllowAnyHeader()
                         .AllowAnyMethod());
                         // .AllowCredentials());
@@ -117,7 +117,7 @@ builder.Services.AddEndpointsApiExplorer();
 
 var app = builder.Build();
 
-app.UseCors("AllowReactClient");
+app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseStaticFiles();
