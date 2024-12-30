@@ -157,5 +157,13 @@ app.UseSwaggerUI(c =>
     c.RoutePrefix = string.Empty;
 });
 // app.UseHttpsRedirection();
+
+app.UseCookiePolicy(new CookiePolicyOptions
+{
+    MinimumSameSitePolicy = SameSiteMode.None, 
+    HttpOnly = Microsoft.AspNetCore.CookiePolicy.HttpOnlyPolicy.Always,
+    Secure = CookieSecurePolicy.Always, 
+});
+
 app.MapControllers();
 app.Run();
