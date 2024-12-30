@@ -40,15 +40,16 @@ builder.Services.AddAuthentication("Bearer")
         };
         options.Events = new JwtBearerEvents
         {
-            OnMessageReceived = context =>
+                    OnMessageReceived = context =>
         {
             if (string.IsNullOrEmpty(context.Token) && context.Request.Cookies.ContainsKey("token"))
             {
                 context.Token = context.Request.Cookies["token"];
-                Console.WriteLine("Token từ cookie: " + context.Token);
+                Console.WriteLine("Token nhận được: " + context.Token);
             }
             return Task.CompletedTask;
         },
+
 
             OnTokenValidated = context =>
             {
@@ -83,13 +84,11 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll",
-        policy => policy.WithOrigins("http://localhost:5173", "http://46.202.178.139:5173")
-                        .AllowAnyHeader()
-                        .AllowAnyMethod()
-                        .AllowCredentials());
-});
-
+    options.AddPolicy("AllowAll", policy =>
+    policy.WithOrigins("http://localhost:5173", "http://46.202.178.139:5173")
+          .AllowAnyHeader()
+          .AllowAnyMethod()
+          .AllowCredentials());
 
 
 builder.WebHost.UseUrls("http://0.0.0.0:5005");
@@ -144,14 +143,15 @@ builder.Services.AddEndpointsApiExplorer();
 
 var app = builder.Build();
 
-app.UseCors("AllowAll");
 app.UseCookiePolicy(new CookiePolicyOptions
 {
-    MinimumSameSitePolicy = SameSiteMode.Lax,
+    MinimumSameSitePolicy = SameSiteMode.None,
     HttpOnly = Microsoft.AspNetCore.CookiePolicy.HttpOnlyPolicy.Always,
     Secure = CookieSecurePolicy.None,
 });
 
+
+app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseStaticFiles();
