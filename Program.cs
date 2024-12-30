@@ -41,11 +41,11 @@ builder.Services.AddAuthentication("Bearer")
         options.Events = new JwtBearerEvents
         {
             OnMessageReceived = context =>
-
         {
             if (string.IsNullOrEmpty(context.Token) && context.Request.Cookies.ContainsKey("token"))
             {
                 context.Token = context.Request.Cookies["token"];
+                Console.WriteLine("Token từ cookie: " + context.Token);
             }
             return Task.CompletedTask;
         },
@@ -147,10 +147,11 @@ var app = builder.Build();
 app.UseCors("AllowAll");
 app.UseCookiePolicy(new CookiePolicyOptions
 {
-    MinimumSameSitePolicy = SameSiteMode.None, 
+    MinimumSameSitePolicy = SameSiteMode.Lax,
     HttpOnly = Microsoft.AspNetCore.CookiePolicy.HttpOnlyPolicy.Always,
-    Secure = CookieSecurePolicy.SameAsRequest , 
+    Secure = CookieSecurePolicy.None,
 });
+
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseStaticFiles();
