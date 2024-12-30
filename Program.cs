@@ -13,11 +13,15 @@ using five_birds_be.Servi;
 
 
 var builder = WebApplication.CreateBuilder(args);
+
+//connect dbdb
 builder.Services.AddDbContext<DataContext>(options =>
     options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"),
         new MySqlServerVersion(new Version(8, 0, 30)))
 );
 
+
+//option controllers and JSON options
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
@@ -26,9 +30,9 @@ builder.Services.AddControllers()
     });
 
 
-
-builder.Services.AddAuthentication("Bearer")
-    .AddJwtBearer("Bearer", options =>
+//authentication
+builder.Services.AddAuthentication("CookieOnly")
+    .AddJwtBearer("CookieOnly", options =>
     {
         options.TokenValidationParameters = new TokenValidationParameters
         {
@@ -38,18 +42,23 @@ builder.Services.AddAuthentication("Bearer")
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
         };
+
         options.Events = new JwtBearerEvents
         {
-                    OnMessageReceived = context =>
-        {
-            if (string.IsNullOrEmpty(context.Token) && context.Request.Cookies.ContainsKey("token"))
+            OnMessageReceived = context =>
             {
-                context.Token = context.Request.Cookies["token"];
-                Console.WriteLine("Token nhận được: " + context.Token);
-            }
-            return Task.CompletedTask;
-        },
+                if (context.Request.Cookies.ContainsKey("token"))
+                {
+                    context.Token = context.Request.Cookies["token"];
+                    Console.WriteLine("Token nhận được từ cookie: " + context.Token);
+                }
+                else
+                {
+                    Console.WriteLine("Không tìm thấy token trong cookie.");
+                }
 
+                return Task.CompletedTask;
+            },
 
             OnTokenValidated = context =>
             {
@@ -59,15 +68,27 @@ builder.Services.AddAuthentication("Bearer")
                 if (roleClaim != null)
                 {
                     claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, roleClaim.Value));
+                    Console.WriteLine("Role đã được thêm vào ClaimsIdentity: " + roleClaim.Value);
                 }
 
                 return Task.CompletedTask;
             }
         };
-
     });
 
 
+//cors
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+        policy.WithOrigins("http://localhost:5173", "http://46.202.178.139:5173")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials());
+});
+
+
+//cookie policy
 builder.Services.Configure<ApiBehaviorOptions>(options =>
 {
     options.InvalidModelStateResponseFactory = context =>
@@ -82,31 +103,7 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 });
 
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAll", policy =>
-        policy.WithOrigins("http://localhost:5173", "http://46.202.178.139:5173")
-              .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials());
-});
 
-builder.WebHost.UseUrls("http://0.0.0.0:5005");
-builder.Services.AddScoped<UserService>();
-builder.Services.AddScoped<ExamService>();
-builder.Services.AddScoped<QuestionService>();
-builder.Services.AddScoped<AnswerService>();
-builder.Services.AddScoped<ResultService>();
-builder.Services.AddScoped<CandidateTestService>();
-
-
-builder.Services.AddScoped<JwtService>();
-builder.Services.AddScoped<CloudinaryService>();
-builder.Services.AddScoped<EmailService>();
-builder.Services.AddScoped<ICandidateService, CandidateService>();
-builder.Services.AddSingleton<IWebHostEnvironment>(builder.Environment);
-builder.Services.AddHttpContextAccessor();
-builder.Services.AddMemoryCache();
 
 builder.Services.AddSwaggerGen(c =>
 {
@@ -137,11 +134,34 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 
+
+
+builder.WebHost.UseUrls("http://0.0.0.0:5005");
+builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<ExamService>();
+builder.Services.AddScoped<QuestionService>();
+builder.Services.AddScoped<AnswerService>();
+builder.Services.AddScoped<ResultService>();
+builder.Services.AddScoped<CandidateTestService>();
+
+
+builder.Services.AddScoped<JwtService>();
+builder.Services.AddScoped<CloudinaryService>();
+builder.Services.AddScoped<EmailService>();
+builder.Services.AddScoped<ICandidateService, CandidateService>();
+builder.Services.AddSingleton<IWebHostEnvironment>(builder.Environment);
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddMemoryCache();
+
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
 
+
+
 var app = builder.Build();
+
 
 app.UseCookiePolicy(new CookiePolicyOptions
 {
