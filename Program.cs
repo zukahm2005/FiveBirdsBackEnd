@@ -145,24 +145,21 @@ builder.Services.AddEndpointsApiExplorer();
 var app = builder.Build();
 
 app.UseCors("AllowAll");
+app.UseCookiePolicy(new CookiePolicyOptions
+{
+    MinimumSameSitePolicy = SameSiteMode.None, 
+    HttpOnly = Microsoft.AspNetCore.CookiePolicy.HttpOnlyPolicy.Always,
+    Secure = CookieSecurePolicy.SameAsRequest , 
+});
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseStaticFiles();
-
 
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "API Documentation V1");
     c.RoutePrefix = string.Empty;
-});
-// app.UseHttpsRedirection();
-
-app.UseCookiePolicy(new CookiePolicyOptions
-{
-    MinimumSameSitePolicy = SameSiteMode.None, 
-    HttpOnly = Microsoft.AspNetCore.CookiePolicy.HttpOnlyPolicy.Always,
-    Secure = CookieSecurePolicy.Always, 
 });
 
 app.MapControllers();
