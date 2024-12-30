@@ -85,11 +85,11 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
-    policy.WithOrigins("http://localhost:5173", "http://46.202.178.139:5173")
-          .AllowAnyHeader()
-          .AllowAnyMethod()
-          .AllowCredentials());
-
+        policy.WithOrigins("http://localhost:5173", "http://46.202.178.139:5173")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials());
+});
 
 builder.WebHost.UseUrls("http://0.0.0.0:5005");
 builder.Services.AddScoped<UserService>();
