@@ -19,10 +19,8 @@ namespace five_birds_be.Services
 
         public async Task<ApiResponse<CandidateTestRespone>> addCandidateTest(CandidateTestDTO candidateTest)
         {
-
             var dataCandidateTest = await _dataContext.CandidateTests.FirstOrDefaultAsync(c => c.UserId == candidateTest.UserId);
             if (dataCandidateTest != null) return ApiResponse<CandidateTestRespone>.Failure(400, "has answered");
-
 
             var dataUser = await _dataContext.User.FirstOrDefaultAsync(u => u.UserId == candidateTest.UserId);
             if (dataUser == null) return ApiResponse<CandidateTestRespone>.Failure(400, "Invalid dataUser provided ");
@@ -35,38 +33,43 @@ namespace five_birds_be.Services
 
             var dataResults = await query.ToListAsync();
 
-            var newPoint = 0;
+            if (dataResults == null || !dataResults.Any())
+            {
+                return ApiResponse<CandidateTestRespone>.Failure(400, "No results found for this exam and user.");
+            }
+
+            int newPoint = 0;
 
             foreach (var result in dataResults)
             {
                 if (result.Is_correct == true && result.QuestionId != null)
                 {
                     var questionData = await _dataContext.Question.FirstOrDefaultAsync(q => q.Id == result.QuestionId);
+
                     if (questionData != null)
                     {
-                        newPoint += Convert.ToInt32(questionData.Point);
+                        newPoint += questionData.Point;
                     }
                 }
             }
-            if (newPoint >= 80)
-            {
-                candidateTest.IsPast = true;
-            }
-            else
-            {
-                candidateTest.IsPast = false;
-            }
+
+            bool IsPast;
+
+            if (newPoint >= 80) { IsPast = true; }
+            else { IsPast = false; }
 
             var newCandidateTest = new CandidateTest
             {
-                Id = candidateTest.Id,
                 UserId = candidateTest.UserId,
                 User = dataUser,
                 ExamId = candidateTest.ExamId,
                 Exam = dataExam,
                 Point = newPoint,
-                IsPast = candidateTest.IsPast
+                IsPast = IsPast
             };
+
+            await _dataContext.CandidateTests.AddAsync(newCandidateTest);
+            await _dataContext.SaveChangesAsync();
 
             var newCandidateTestResponse = new CandidateTestRespone
             {
@@ -78,12 +81,7 @@ namespace five_birds_be.Services
 
             };
 
-            await _dataContext.CandidateTests.AddAsync(newCandidateTest);
-            await _dataContext.SaveChangesAsync();
-
-
             return ApiResponse<CandidateTestRespone>.Success(200, newCandidateTestResponse, "create success");
-
         }
 
         private async Task<List<object>> GetResultsByQuestionIdAsync(int questionId, int userId)

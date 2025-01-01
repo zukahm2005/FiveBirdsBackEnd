@@ -7,7 +7,7 @@ namespace five_birds_be.DTO.Response
         public int Id { get; set; }
         public int ExamId { get; set; }
         public string QuestionExam { get; set; }
-        public string Point { get; set; }
+        public int Point { get; set; }
         public List<AnswerResponse> Answers { get; set; } = new List<AnswerResponse>();
     }
 }

@@ -63,5 +63,11 @@ namespace five_birds_be.Controllers
 
             return Ok(response);
         }
+        [HttpPost("send/email/{id}")]
+        public async Task<IActionResult> SenEmailCandidate(int id, [FromBody] EmailRequest emailRequest){
+            var response = await _candidateService.SendEmailCandidate(id, emailRequest);
+            if (response.ErrorCode == 404) return NotFound(response);
+            return Ok(response);
+        }
     }
 }

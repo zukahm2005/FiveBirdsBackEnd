@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace five_birds_be.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialMigration : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -67,8 +67,7 @@ namespace five_birds_be.Migrations
                     ExamId = table.Column<int>(type: "int", nullable: false),
                     QuestionExam = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Point = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Point = table.Column<int>(type: "int", nullable: false),
                     Create_at = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     Update_at = table.Column<DateTime>(type: "datetime(6)", nullable: false)
                 },
@@ -118,6 +117,69 @@ namespace five_birds_be.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "CandidateTests",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    ExamId = table.Column<int>(type: "int", nullable: false),
+                    Point = table.Column<int>(type: "int", nullable: false),
+                    IsPast = table.Column<bool>(type: "tinyint(1)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CandidateTests", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_CandidateTests_Exam_ExamId",
+                        column: x => x.ExamId,
+                        principalTable: "Exam",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_CandidateTests_User_UserId",
+                        column: x => x.UserId,
+                        principalTable: "User",
+                        principalColumn: "UserId",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "User_Exams",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    ExamId = table.Column<int>(type: "int", nullable: false),
+                    TestStatus = table.Column<int>(type: "int", nullable: false),
+                    ExamTime = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    ExamDate = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Create_at = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    Update_at = table.Column<DateTime>(type: "datetime(6)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_User_Exams", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_User_Exams_Exam_ExamId",
+                        column: x => x.ExamId,
+                        principalTable: "Exam",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_User_Exams_User_UserId",
+                        column: x => x.UserId,
+                        principalTable: "User",
+                        principalColumn: "UserId",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "Answer",
                 columns: table => new
                 {
@@ -132,8 +194,7 @@ namespace five_birds_be.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Answer4 = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    CorrectAnswer = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    CorrectAnswer = table.Column<int>(type: "int", nullable: false),
                     Create_at = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     Update_at = table.Column<DateTime>(type: "datetime(6)", nullable: false)
                 },
@@ -158,11 +219,10 @@ namespace five_birds_be.Migrations
                     UserId = table.Column<int>(type: "int", nullable: false),
                     ExamId = table.Column<int>(type: "int", nullable: false),
                     QuestionId = table.Column<int>(type: "int", nullable: false),
-                    Answers = table.Column<int>(type: "int", nullable: false),
                     AnswerId = table.Column<int>(type: "int", nullable: false),
-                    ExamAnswer = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    ExamAnswer = table.Column<int>(type: "int", nullable: false),
                     Is_correct = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    CandidateTestId = table.Column<int>(type: "int", nullable: true),
                     Create_at = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     Update_at = table.Column<DateTime>(type: "datetime(6)", nullable: false)
                 },
@@ -175,6 +235,11 @@ namespace five_birds_be.Migrations
                         principalTable: "Answer",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Result_CandidateTests_CandidateTestId",
+                        column: x => x.CandidateTestId,
+                        principalTable: "CandidateTests",
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Result_Exam_ExamId",
                         column: x => x.ExamId,
@@ -208,6 +273,16 @@ namespace five_birds_be.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_CandidateTests_ExamId",
+                table: "CandidateTests",
+                column: "ExamId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CandidateTests_UserId",
+                table: "CandidateTests",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Question_ExamId",
                 table: "Question",
                 column: "ExamId");
@@ -216,6 +291,11 @@ namespace five_birds_be.Migrations
                 name: "IX_Result_AnswerId",
                 table: "Result",
                 column: "AnswerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Result_CandidateTestId",
+                table: "Result",
+                column: "CandidateTestId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Result_ExamId",
@@ -231,6 +311,16 @@ namespace five_birds_be.Migrations
                 name: "IX_Result_UserId",
                 table: "Result",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_User_Exams_ExamId",
+                table: "User_Exams",
+                column: "ExamId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_User_Exams_UserId",
+                table: "User_Exams",
+                column: "UserId");
         }
 
         /// <inheritdoc />
@@ -243,13 +333,19 @@ namespace five_birds_be.Migrations
                 name: "Result");
 
             migrationBuilder.DropTable(
+                name: "User_Exams");
+
+            migrationBuilder.DropTable(
                 name: "Answer");
 
             migrationBuilder.DropTable(
-                name: "User");
+                name: "CandidateTests");
 
             migrationBuilder.DropTable(
                 name: "Question");
+
+            migrationBuilder.DropTable(
+                name: "User");
 
             migrationBuilder.DropTable(
                 name: "Exam");

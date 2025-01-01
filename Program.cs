@@ -99,6 +99,7 @@ builder.Services.AddScoped<QuestionService>();
 builder.Services.AddScoped<AnswerService>();
 builder.Services.AddScoped<ResultService>();
 builder.Services.AddScoped<CandidateTestService>();
+builder.Services.AddScoped<UserExamService>();
 
 
 builder.Services.AddScoped<JwtService>();

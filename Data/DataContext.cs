@@ -17,6 +17,8 @@ namespace five_birds_be.Data
 
         public DbSet<Candidate> Candidates { get; set; }
 
+        public DbSet<User_Eaxam> User_Exams { get; set; }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
 
@@ -24,20 +26,24 @@ namespace five_birds_be.Data
                 .HasMany(e => e.Question)
                 .WithOne(e => e.Exam)
                 .HasForeignKey(e => e.ExamId);
+
             builder.Entity<Question>()
                 .HasMany(e => e.Answers)
                 .WithOne(e => e.Question)
                 .HasForeignKey(e => e.QuestionId);
+
             builder.Entity<Result>()
                 .HasOne(r => r.User)
                 .WithMany(u => u.Results)
                 .HasForeignKey(r => r.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
+
             builder.Entity<CandidateTest>()
                 .HasOne(c => c.User)
                 .WithMany(u => u.CandidateTests)
                 .HasForeignKey(c => c.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
+
             builder.Entity<CandidateTest>()
                 .HasOne(c => c.Exam)
                 .WithMany(e => e.CandidateTests)
