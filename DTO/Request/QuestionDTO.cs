@@ -6,6 +6,6 @@ namespace five_birds_be.Dto
     {
         public int ExamId { get; set; }
         public string QuestionExam { get; set; }
-        public string Point { get; set; }
+        public int Point { get; set; }
     }
 }

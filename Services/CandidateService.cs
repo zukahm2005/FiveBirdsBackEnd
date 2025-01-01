@@ -14,6 +14,8 @@ namespace five_birds_be.Services
         Task<ApiResponse<CandidateResponse>> GetCandidateByIdAsync(int id);
         Task<ApiResponse<string>> UpdateCandidateAsync(int id, CandidateRequest request);
         Task<ApiResponse<string>> DeleteCandidateAsync(int id);
+        Task<ApiResponse<string>> SendEmailCandidate (int id, EmailRequest body);
+
     }
 
     public class CandidateService : ICandidateService
@@ -21,10 +23,13 @@ namespace five_birds_be.Services
         private readonly DataContext _context;
         private readonly IWebHostEnvironment _env;
 
-        public CandidateService(DataContext context, IWebHostEnvironment env)
+        private readonly EmailService _emailService;
+
+        public CandidateService(DataContext context, IWebHostEnvironment env, EmailService emailService)
         {
             _context = context;
             _env = env;
+            _emailService = emailService;
         }
 
         public async Task<ApiResponse<string>> CreateCandidateAsync(CandidateRequest request)
@@ -185,6 +190,21 @@ namespace five_birds_be.Services
             _context.Candidates.Remove(candidate);
             await _context.SaveChangesAsync();
             return ApiResponse<string>.Success(200, "Ứng viên đã được xóa.");
+        }
+
+        public async Task<ApiResponse<string>> SendEmailCandidate(int id, EmailRequest body)
+        {
+            var candidate = await _context.Candidates.FirstOrDefaultAsync(cd => cd.Id == id);
+            if (candidate == null)
+                return ApiResponse<string>.Failure(404, "Không tìm thấy ID ứng viên");
+
+            var email = candidate.Email;
+            if (string.IsNullOrEmpty(email))
+                return ApiResponse<string>.Failure(404, "Email của ứng viên không tồn tại");
+
+            await _emailService.SendEmailAsyncObject(email, "Exam schedule announcement", body);
+
+            return ApiResponse<string>.Success(200, "Gửi email thành công");
         }
     }
 }

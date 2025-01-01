@@ -20,6 +20,7 @@ Project ATM Bank
 6. Áp dụng Migration để tạo Database 
     dotnet ef database update 
 7. jwt 
+
  dotnet add package Microsoft.AspNetCore.Authentication.JwtBearerdot
 
 

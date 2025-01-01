@@ -41,9 +41,8 @@ namespace five_birds_be.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<string>("CorrectAnswer")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                    b.Property<int>("CorrectAnswer")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("Create_at")
                         .HasColumnType("datetime(6)");
@@ -105,6 +104,33 @@ namespace five_birds_be.Migrations
                     b.ToTable("Candidates");
                 });
 
+            modelBuilder.Entity("five_birds_be.Models.CandidateTest", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<int>("ExamId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsPast")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<int>("Point")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ExamId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("CandidateTests");
+                });
+
             modelBuilder.Entity("five_birds_be.Models.Exam", b =>
                 {
                     b.Property<int>("Id")
@@ -146,9 +172,8 @@ namespace five_birds_be.Migrations
                     b.Property<int>("ExamId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Point")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                    b.Property<int>("Point")
+                        .HasColumnType("int");
 
                     b.Property<string>("QuestionExam")
                         .IsRequired()
@@ -173,15 +198,14 @@ namespace five_birds_be.Migrations
                     b.Property<int>("AnswerId")
                         .HasColumnType("int");
 
-                    b.Property<int>("Answers")
+                    b.Property<int?>("CandidateTestId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("Create_at")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<string>("ExamAnswer")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                    b.Property<int>("ExamAnswer")
+                        .HasColumnType("int");
 
                     b.Property<int>("ExamId")
                         .HasColumnType("int");
@@ -201,6 +225,8 @@ namespace five_birds_be.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AnswerId");
+
+                    b.HasIndex("CandidateTestId");
 
                     b.HasIndex("ExamId");
 
@@ -243,6 +269,44 @@ namespace five_birds_be.Migrations
                     b.ToTable("User");
                 });
 
+            modelBuilder.Entity("five_birds_be.Models.User_Eaxam", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Create_at")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("ExamDate")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("ExamId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ExamTime")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("TestStatus")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Update_at")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ExamId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("User_Exams");
+                });
+
             modelBuilder.Entity("five_birds_be.Models.Answer", b =>
                 {
                     b.HasOne("five_birds_be.Models.Question", "Question")
@@ -261,6 +325,25 @@ namespace five_birds_be.Migrations
                         .HasForeignKey("five_birds_be.Models.Candidate", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("five_birds_be.Models.CandidateTest", b =>
+                {
+                    b.HasOne("five_birds_be.Models.Exam", "Exam")
+                        .WithMany("CandidateTests")
+                        .HasForeignKey("ExamId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("five_birds_be.Models.User", "User")
+                        .WithMany("CandidateTests")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Exam");
 
                     b.Navigation("User");
                 });
@@ -284,35 +367,65 @@ namespace five_birds_be.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("five_birds_be.Models.Exam", "exam")
+                    b.HasOne("five_birds_be.Models.CandidateTest", null)
+                        .WithMany("Results")
+                        .HasForeignKey("CandidateTestId");
+
+                    b.HasOne("five_birds_be.Models.Exam", "Exam")
                         .WithMany()
                         .HasForeignKey("ExamId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("five_birds_be.Models.Question", "Auestions")
+                    b.HasOne("five_birds_be.Models.Question", "Questions")
                         .WithMany()
                         .HasForeignKey("QuestionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("five_birds_be.Models.User", "user")
-                        .WithMany()
+                    b.HasOne("five_birds_be.Models.User", "User")
+                        .WithMany("Results")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Answer");
 
-                    b.Navigation("Auestions");
+                    b.Navigation("Exam");
 
-                    b.Navigation("exam");
+                    b.Navigation("Questions");
 
-                    b.Navigation("user");
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("five_birds_be.Models.User_Eaxam", b =>
+                {
+                    b.HasOne("five_birds_be.Models.Exam", "Exam")
+                        .WithMany()
+                        .HasForeignKey("ExamId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("five_birds_be.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Exam");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("five_birds_be.Models.CandidateTest", b =>
+                {
+                    b.Navigation("Results");
                 });
 
             modelBuilder.Entity("five_birds_be.Models.Exam", b =>
                 {
+                    b.Navigation("CandidateTests");
+
                     b.Navigation("Question");
                 });
 
@@ -325,6 +438,10 @@ namespace five_birds_be.Migrations
                 {
                     b.Navigation("Candidate")
                         .IsRequired();
+
+                    b.Navigation("CandidateTests");
+
+                    b.Navigation("Results");
                 });
 #pragma warning restore 612, 618
         }

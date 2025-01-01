@@ -131,5 +131,10 @@ namespace five_birds_be.Servi
 
             return ApiResponse<ExamResponse>.Success(200, newExamDto, "update exam success");
         }
+
+        public async Task<ApiResponse<object>> getExam(){
+            var data = await _dataContext.Exam.ToListAsync();  
+            return ApiResponse<object>.Success(200, data);
+         }
     }
 }

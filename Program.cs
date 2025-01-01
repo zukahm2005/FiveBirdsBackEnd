@@ -105,6 +105,25 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 
 
 
+
+builder.WebHost.UseUrls("http://0.0.0.0:5005");
+builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<ExamService>();
+builder.Services.AddScoped<QuestionService>();
+builder.Services.AddScoped<AnswerService>();
+builder.Services.AddScoped<ResultService>();
+builder.Services.AddScoped<CandidateTestService>();
+builder.Services.AddScoped<UserExamService>();
+
+
+builder.Services.AddScoped<JwtService>();
+builder.Services.AddScoped<CloudinaryService>();
+builder.Services.AddScoped<EmailService>();
+builder.Services.AddScoped<ICandidateService, CandidateService>();
+builder.Services.AddSingleton<IWebHostEnvironment>(builder.Environment);
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddMemoryCache();
+
 builder.Services.AddSwaggerGen(c =>
 {
     c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
@@ -133,25 +152,6 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-
-
-
-builder.WebHost.UseUrls("http://0.0.0.0:5005");
-builder.Services.AddScoped<UserService>();
-builder.Services.AddScoped<ExamService>();
-builder.Services.AddScoped<QuestionService>();
-builder.Services.AddScoped<AnswerService>();
-builder.Services.AddScoped<ResultService>();
-builder.Services.AddScoped<CandidateTestService>();
-
-
-builder.Services.AddScoped<JwtService>();
-builder.Services.AddScoped<CloudinaryService>();
-builder.Services.AddScoped<EmailService>();
-builder.Services.AddScoped<ICandidateService, CandidateService>();
-builder.Services.AddSingleton<IWebHostEnvironment>(builder.Environment);
-builder.Services.AddHttpContextAccessor();
-builder.Services.AddMemoryCache();
 
 
 builder.Services.AddControllers();

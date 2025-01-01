@@ -51,5 +51,12 @@ namespace five_birds_be.Controllers
             if (exam.ErrorCode == 404) return NotFound(exam);
             return Ok(exam);
         }
+        [HttpGet("get")]
+        [Authorize(Roles = "ROLE_ADMIN")]
+        public async Task<IActionResult> getExam()
+        {
+            var exam = await _examService.getExam();
+            return Ok(exam);
+        }
     }
 }
