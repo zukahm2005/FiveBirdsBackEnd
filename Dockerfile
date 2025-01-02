@@ -6,7 +6,7 @@ WORKDIR /app
 COPY five-birds-be.csproj ./
 RUN dotnet restore five-birds-be.csproj
 
-COPY wwwroot ./wwwroot
+# COPY wwwroot ./wwwroot
 
 # Copy toàn bộ mã nguồn và build ứng dụng
 COPY . ./
