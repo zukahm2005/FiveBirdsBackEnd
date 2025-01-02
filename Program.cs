@@ -123,7 +123,6 @@ builder.Services.AddScoped<ICandidateService, CandidateService>();
 builder.Services.AddSingleton<IWebHostEnvironment>(builder.Environment);
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddMemoryCache();
-builder.WebHost.UseWebRoot("wwwroot");
 
 builder.Services.AddSwaggerGen(c =>
 {
