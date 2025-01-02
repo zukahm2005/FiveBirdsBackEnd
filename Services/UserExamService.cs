@@ -81,7 +81,7 @@ namespace five_birds_be.Services
         public async Task<ApiResponse<object>> GetUserExamById(int id)
         {
             var userExam = await _dataContext.User_Exams
-                .Where(ue => ue.Id == id)
+                .Where(ue => ue.UserId == id)
                 .Select(ue => new
                 {
                     ue.Id,
@@ -102,7 +102,7 @@ namespace five_birds_be.Services
                     ue.ExamTime,
                     ue.ExamDate
                 })
-                .FirstOrDefaultAsync();
+                .ToListAsync();
 
             if (userExam == null)
             {
