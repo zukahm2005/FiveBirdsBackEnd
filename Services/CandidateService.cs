@@ -46,6 +46,12 @@ namespace five_birds_be.Services
                     return ApiResponse<string>.Failure(400, "File CV phải là PDF hoặc hình ảnh.");
                 }
 
+                if (string.IsNullOrEmpty(_env.WebRootPath))
+                {
+                    throw new Exception("WebRootPath không được cấu hình. Vui lòng kiểm tra lại môi trường hosting.");
+                }
+
+
                 var uploadsFolder = Path.Combine(_env.WebRootPath, "uploads");
                 if (!Directory.Exists(uploadsFolder))
                 {
