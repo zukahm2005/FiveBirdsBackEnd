@@ -93,5 +93,12 @@ namespace five_birds_be.Services
 
             return ApiResponse<QuestionResponse>.Success(200, newQuestionDTO, "update question success");
         }
+        public async Task<ApiResponse<string>> deleteQuestion(int id){
+            var question = await _dataContext.Question.FirstOrDefaultAsync(q => q.Id == id);
+            if (question == null) return ApiResponse<string>.Failure(404, "id not found");
+            _dataContext.Question.Remove(question);
+            await _dataContext.SaveChangesAsync();
+            return ApiResponse<string>.Success(200, "delete question success");
+        }
     }
 }

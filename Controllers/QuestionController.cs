@@ -55,5 +55,14 @@ namespace five_birds_be.Controllers
             if (question.ErrorCode == 404) return NotFound(question);
             return Ok(question);
         }
+
+        [HttpDelete("delete/{id}")]
+        [Authorize(Roles = "ROLE_ADMIN")]
+        public async Task<IActionResult> delete(int id)
+        {
+            var question = await _questionService.deleteQuestion(id);
+            if (question.ErrorCode == 404) return NotFound(question);
+            return Ok(question);
+        }
     }
 }

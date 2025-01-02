@@ -58,5 +58,14 @@ namespace five_birds_be.Controllers
             var exam = await _examService.getExam();
             return Ok(exam);
         }
+
+        [HttpDelete("delete/{id}")]
+        [Authorize(Roles = "ROLE_ADMIN")]
+        public async Task<IActionResult> deleteExam(int id)
+        {
+            var exam = await _examService.deleteExam(id);
+            if (exam.ErrorCode == 404) return NotFound(exam);
+            return Ok(exam);
+        }
     }
 }

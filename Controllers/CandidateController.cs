@@ -1,6 +1,7 @@
 using five_birds_be.DTO.Request;
 using five_birds_be.Response;
 using five_birds_be.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace five_birds_be.Controllers
@@ -28,6 +29,8 @@ namespace five_birds_be.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "ROLE_ADMIN")]
+
         public async Task<IActionResult> GetCandidates()
         {
             var response = await _candidateService.GetCandidatesAsync();
@@ -35,6 +38,7 @@ namespace five_birds_be.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize(Roles = "ROLE_ADMIN, ROLE_CANDIDATE")]
         public async Task<IActionResult> GetCandidateById(int id)
         {
             var response = await _candidateService.GetCandidateByIdAsync(id);
@@ -45,6 +49,7 @@ namespace five_birds_be.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "ROLE_ADMIN")]
         public async Task<IActionResult> UpdateCandidate(int id, [FromBody] CandidateRequest request)
         {
             var response = await _candidateService.UpdateCandidateAsync(id, request);
@@ -55,6 +60,7 @@ namespace five_birds_be.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "ROLE_ADMIN")]
         public async Task<IActionResult> DeleteCandidate(int id)
         {
             var response = await _candidateService.DeleteCandidateAsync(id);
@@ -64,7 +70,9 @@ namespace five_birds_be.Controllers
             return Ok(response);
         }
         [HttpPost("send/email/{id}")]
-        public async Task<IActionResult> SenEmailCandidate(int id, [FromBody] EmailRequest emailRequest){
+        [Authorize(Roles = "ROLE_ADMIN")]
+        public async Task<IActionResult> SenEmailCandidate(int id, [FromBody] EmailRequest emailRequest)
+        {
             var response = await _candidateService.SendEmailCandidate(id, emailRequest);
             if (response.ErrorCode == 404) return NotFound(response);
             return Ok(response);

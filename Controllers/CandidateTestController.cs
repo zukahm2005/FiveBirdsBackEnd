@@ -1,6 +1,7 @@
 using five_birds_be.Dto;
 using five_birds_be.Models;
 using five_birds_be.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace five_birds_be.Controllers
@@ -11,12 +12,14 @@ namespace five_birds_be.Controllers
     {
         private CandidateTestService _candidateTestService;
 
-        public CandidateTestController(CandidateTestService candidateTestService){
+        public CandidateTestController(CandidateTestService candidateTestService)
+        {
             _candidateTestService = candidateTestService;
         }
-         
+
 
         [HttpPost("add")]
+        [Authorize(Roles = "ROLE_CANDIDATE")]
         public async Task<IActionResult> post(CandidateTestDTO candidateTest)
         {
             var data = await _candidateTestService.addCandidateTest(candidateTest);
@@ -25,14 +28,18 @@ namespace five_birds_be.Controllers
         }
 
         [HttpGet("get/{id}")]
-        public async Task<IActionResult> getById(int id){
+        [Authorize(Roles = "ROLE_ADMIN, ROLE_CANDIDATE")]
+        public async Task<IActionResult> getById(int id)
+        {
             var data = await _candidateTestService.GetCandidateTestResultByIdAsync(id);
             if (data.ErrorCode == 404) return NotFound(data);
             return Ok(data);
         }
 
         [HttpGet("get/all")]
-        public async Task<IActionResult> getAll (int pageNumber, int pageSize){
+        [Authorize(Roles = "ROLE_ADMIN")]
+        public async Task<IActionResult> getAll(int pageNumber, int pageSize)
+        {
             var data = await _candidateTestService.GetAll(pageNumber, pageSize);
             return Ok(data);
         }

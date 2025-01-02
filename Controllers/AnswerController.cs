@@ -46,6 +46,14 @@ namespace five_birds_be.Dto
             if (answer.ErrorCode == 404) return NotFound(answer);
             return Ok(answer);
         }
+        [HttpDelete("delete/{id}")]
+        [Authorize(Roles = "ROLE_ADMIN")]
+        public async Task<IActionResult> deleteAnswer(int id)
+        {
+            var answer = await _answerService.deleteAnswer(id);
+            if (answer.ErrorCode == 404) return NotFound(answer);
+            return Ok(answer);
+        }
 
     }
 }

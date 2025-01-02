@@ -135,6 +135,14 @@ namespace five_birds_be.Servi
         public async Task<ApiResponse<object>> getExam(){
             var data = await _dataContext.Exam.ToListAsync();  
             return ApiResponse<object>.Success(200, data);
-         }
+        }
+
+        public async Task<ApiResponse<string>> deleteExam(int id){
+            var exam = await _dataContext.Exam.FirstOrDefaultAsync(x => x.Id == id);
+            if (exam == null) return ApiResponse<string>.Failure(404, "id not found");
+            _dataContext.Exam.Remove(exam);
+            await _dataContext.SaveChangesAsync();
+            return ApiResponse<string>.Success(200, "delete exam success");
+        }
     }
 }
