@@ -34,6 +34,7 @@ namespace five_birds_be.Services
             if (pageNumber < 1) pageNumber = 1;
 
             return await _dataContext.User
+                .Where(user => user.Role != Role.ROLE_ADMIN)
                 .Skip((pageNumber - 1) * 10)
                 .Take(pageSize)
                 .ToListAsync();
@@ -51,7 +52,7 @@ namespace five_birds_be.Services
 
             var newUserDTO = new User
             {
-                UserName =userDTO.UserName,
+                UserName = userDTO.UserName,
                 Email = userDTO.Email,
                 Password = BCrypt.Net.BCrypt.HashPassword(userDTO.Password),
                 Create_at = DateTime.UtcNow
@@ -87,7 +88,7 @@ namespace five_birds_be.Services
 
             var userResponseDTO = new UserResponseDTO
             {
-                UserName= user.UserName,
+                UserName = user.UserName,
                 Email = user.Email,
                 Create_at = user.Create_at,
                 Update_at = user.Update_at,
