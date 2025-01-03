@@ -123,7 +123,7 @@ namespace five_birds_be.Services
                 .FirstOrDefaultAsync(u => u.UserName == userLoginDTO.UserName);
 
             if (user == null)
-                return ApiResponse<string>.Failure(404, "user not found");
+                return ApiResponse<string>.Failure(404, "User not found");
 
             if (user.Password != userLoginDTO.Password)
             {
@@ -131,6 +131,7 @@ namespace five_birds_be.Services
             }
 
             var token = _jservice.GenerateJwtToken(user);
+
             SetAuthCookie(token);
 
             return ApiResponse<string>.Success(200, token, "Đăng nhập thành công.");
