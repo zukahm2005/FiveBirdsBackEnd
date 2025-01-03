@@ -4,6 +4,7 @@ using System.Net.Mail;
 using System.Text.Json;
 using System.Threading.Tasks;
 using five_birds_be.DTO.Request;
+using five_birds_be.DTO.Response;
 
 public class EmailService
 {
@@ -28,7 +29,7 @@ public class EmailService
 
         await smtpClient.SendMailAsync(mailMessage);
     }
-    public async Task SendEmailAsyncObject(string toEmail, string subject, EmailRequest body)
+    public async Task SendEmailAsyncObject(string toEmail, string subject, EmailResponse body)
     {
         var fromEmail = "selingbook@gmail.com";
         var fromPassword = "fsudhvspvdzlvhko";
@@ -59,6 +60,13 @@ public class EmailService
                                                 <p style='font-size: 16px; margin: 10px 0;'><strong>Date:</strong> {body.selectedDate}</p>
                                                 <p style='font-size: 16px; margin: 10px 0;'><strong>Note:</strong> {body.comment}</p>
                                             </td>
+                                        </tr>
+                                        <tr>
+                                         <td style='padding: 20px; background-color: #ffffff; text-align: center;'>
+                                            <h3> Please use this account to log in. <h3>
+                                            <p style='font-size: 16px; margin: 10px 0;'><strong>UserName:</strong> {body.UserName}</p>
+                                            <p style='font-size: 16px; margin: 10px 0;'><strong>Password:</strong> {body.Password}</p>
+                                         </td>
                                         </tr>
                                         <tr>
                                             <td style='padding: 20px; background-color: #f4f7fc; text-align: center; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px;'>
