@@ -14,7 +14,7 @@ namespace five_birds_be.Services
         Task<ApiResponse<CandidateResponse>> GetCandidateByIdAsync(int id);
         Task<ApiResponse<string>> UpdateCandidateAsync(int id, CandidateRequest request);
         Task<ApiResponse<string>> DeleteCandidateAsync(int id);
-        Task<ApiResponse<string>> SendEmailCandidate (int id, EmailRequest body);
+        Task<ApiResponse<string>> SendEmailCandidate(int id, EmailRequest body);
 
     }
 
@@ -25,16 +25,19 @@ namespace five_birds_be.Services
 
         private readonly EmailService _emailService;
 
-        public CandidateService(DataContext context, IWebHostEnvironment env, EmailService emailService)
+        private readonly IConfiguration _configuration;
+
+        public CandidateService(DataContext context, IWebHostEnvironment env, EmailService emailService, IConfiguration configuration)
         {
             _context = context;
             _env = env;
             _emailService = emailService;
+            _configuration = configuration;
         }
 
         public async Task<ApiResponse<string>> CreateCandidateAsync(CandidateRequest request)
         {
-            string filePath = null;
+            string cvUrl = null;
 
             if (request.CvFile != null)
             {
@@ -46,24 +49,10 @@ namespace five_birds_be.Services
                     return ApiResponse<string>.Failure(400, "File CV phải là PDF hoặc hình ảnh.");
                 }
 
-                if (string.IsNullOrEmpty(_env.WebRootPath))
+                using (var fileStream = request.CvFile.OpenReadStream())
                 {
-                    throw new Exception("WebRootPath không được cấu hình. Vui lòng kiểm tra lại môi trường hosting.");
-                }
-
-
-                var uploadsFolder = Path.Combine(_env.WebRootPath, "uploads");
-                if (!Directory.Exists(uploadsFolder))
-                {
-                    Directory.CreateDirectory(uploadsFolder);
-                }
-
-                var uniqueFileName = $"{Guid.NewGuid()}{fileExtension}";
-                filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                using (var fileStream = new FileStream(filePath, FileMode.Create))
-                {
-                    await request.CvFile.CopyToAsync(fileStream);
+                    var cloudinaryService = new CloudinaryService(_configuration);
+                    cvUrl = await cloudinaryService.UploadImageAsync(fileStream, request.CvFile.FileName);
                 }
             }
 
@@ -77,7 +66,7 @@ namespace five_birds_be.Services
             }
 
             var randomPassword = GenerateRandomPassword();
-            
+
             var user = new User
             {
                 UserName = username,
@@ -98,7 +87,7 @@ namespace five_birds_be.Services
                 Education = request.Education,
                 Experience = request.Experience,
                 ApplyLocation = request.ApplyLocation,
-                CvFilePath = filePath,
+                CvFilePath = cvUrl,
                 UserId = user.UserId
             };
 
@@ -106,14 +95,14 @@ namespace five_birds_be.Services
             await _context.SaveChangesAsync();
 
             string adminEmail = "maituanvu141@gmail.com";
-            string emailSubject = "Thông báo: Có người nộp CV mới";
+            string emailSubject = "Notifity: Candidate up CV";
             string emailBody = $@"
-        <h2>Thông tin ứng viên mới</h2>
-        <p><strong>Họ tên:</strong> {request.FullName}</p>
+        <h2>Information candidate</h2>
+        <p><strong>Full Name:</strong> {request.FullName}</p>
         <p><strong>Email:</strong> {request.Email}</p>
         <p><strong>Username:</strong> {username}</p>
         <p><strong>Password:</strong> {randomPassword}</p>
-        <p>File CV đã được tải lên: <a href='{filePath}'>Tải xuống CV</a></p>
+        <p>File CV: <a href='{cvUrl}'>Download CV</a></p>
     ";
 
             var emailService = new EmailService();
@@ -121,6 +110,7 @@ namespace five_birds_be.Services
 
             return ApiResponse<string>.Success(200, "Send success");
         }
+
 
         private string GenerateRandomPassword()
         {
@@ -155,9 +145,14 @@ namespace five_birds_be.Services
 
         public async Task<ApiResponse<CandidateResponse>> GetCandidateByIdAsync(int id)
         {
-            var candidate = await _context.Candidates.FindAsync(id);
+            var candidate = await _context.Candidates
+                .Include(c => c.User)
+                .FirstOrDefaultAsync(c => c.Id == id);
+
             if (candidate == null)
+            {
                 return ApiResponse<CandidateResponse>.Failure(404, "Candidate not found.");
+            }
 
             var response = new CandidateResponse
             {
@@ -169,11 +164,19 @@ namespace five_birds_be.Services
                 Education = candidate.Education,
                 Experience = candidate.Experience,
                 ApplyLocation = candidate.ApplyLocation,
-                CreatedAt = candidate.CreatedAt
+                CreatedAt = candidate.CreatedAt,
+                User = new UserResponseDTO
+                {
+                    UserId = candidate.User.UserId,
+                    UserName = candidate.User.UserName,
+                    Email = candidate.User.Email,
+                    Password = candidate.User.Password
+                }
             };
 
             return ApiResponse<CandidateResponse>.Success(200, response);
         }
+
 
         public async Task<ApiResponse<string>> UpdateCandidateAsync(int id, CandidateRequest request)
         {
@@ -210,17 +213,18 @@ namespace five_birds_be.Services
             var candidate = await _context.Candidates.FirstOrDefaultAsync(cd => cd.Id == id);
             if (candidate == null)
                 return ApiResponse<string>.Failure(404, "Không tìm thấy ID ứng viên");
-            
+
             var user = await _context.User.FirstOrDefaultAsync(u => u.UserId == candidate.UserId);
             if (user == null) return ApiResponse<string>.Failure(404, "không tìm thấy Id người dùng");
 
-            var body = new EmailResponse{
-            examTitle = emailRequest.examTitle,
-            comment = emailRequest.comment,
-            selectedTime = emailRequest.selectedTime,
-            selectedDate = emailRequest.selectedDate,
-            UserName = user.UserName,
-            Password = user.Password
+            var body = new EmailResponse
+            {
+                examTitle = emailRequest.examTitle,
+                comment = emailRequest.comment,
+                selectedTime = emailRequest.selectedTime,
+                selectedDate = emailRequest.selectedDate,
+                UserName = user.UserName,
+                Password = user.Password
             };
 
             var email = candidate.Email;
