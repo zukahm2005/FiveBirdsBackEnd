@@ -164,6 +164,7 @@ namespace five_birds_be.Services
                 Education = candidate.Education,
                 Experience = candidate.Experience,
                 ApplyLocation = candidate.ApplyLocation,
+                 CvFilePath = candidate.CvFilePath, 
                 CreatedAt = candidate.CreatedAt,
                 User = new UserResponseDTO
                 {
