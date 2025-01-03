@@ -58,7 +58,7 @@ public class EmailService
                                                 <p style='font-size: 16px; margin: 10px 0;'><strong>Exam:</strong> {body.examTitle}</p>
                                                 <p style='font-size: 16px; margin: 10px 0;'><strong>Time:</strong> {body.selectedTime}</p>
                                                 <p style='font-size: 16px; margin: 10px 0;'><strong>Date:</strong> {body.selectedDate}</p>
-                                                <p style='font-size: 16px; margin: 10px 0;'><strong>Note:</strong> {body.comment}</p>
+                                                <p style='font-size: 16px; margin: 10px 0;'><strong>Message:</strong> {body.comment}</p>
                                             </td>
                                         </tr>
                                         <tr>
