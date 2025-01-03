@@ -67,7 +67,7 @@ namespace five_birds_be.Controllers
             if (data.ErrorCode == 400) return BadRequest(data);
 
             if (data.ErrorCode == 500) return StatusCode(500, data);
-            
+
 
             return Ok(data);
         }
@@ -79,7 +79,7 @@ namespace five_birds_be.Controllers
             if (data.ErrorCode == 400) return BadRequest(data);
 
             if (data.ErrorCode == 500) return StatusCode(500, data);
-            
+
 
             return Ok(data);
         }
@@ -167,18 +167,27 @@ namespace five_birds_be.Controllers
                 var jwtToken = handler.ReadJwtToken(token);
 
                 var roleClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "Role")?.Value;
+
+                var userIdClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "UserId")?.Value;
+
                 if (string.IsNullOrEmpty(roleClaim))
                 {
                     return BadRequest(new { message = "Role does not exist in token." });
                 }
 
-                return Ok(new { role = roleClaim, message = "Get role successfully." });
+                if (string.IsNullOrEmpty(userIdClaim))
+                {
+                    return BadRequest(new { message = "UserId does not exist in token." });
+                }
+
+                return Ok(new { role = roleClaim, userId = userIdClaim, message = "Get role and userId successfully." });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Error when checking the relay.", error = ex.Message });
+                return StatusCode(500, new { message = "Error when checking the role.", error = ex.Message });
             }
         }
+
 
     }
 }
