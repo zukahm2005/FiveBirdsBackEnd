@@ -67,7 +67,19 @@ namespace five_birds_be.Controllers
             if (data.ErrorCode == 400) return BadRequest(data);
 
             if (data.ErrorCode == 500) return StatusCode(500, data);
-            ;
+            
+
+            return Ok(data);
+        }
+        [HttpPost("candidate/login")]
+        public async Task<IActionResult> LoginCandidate([FromBody] UserLoginDTO userDTO)
+        {
+            var data = await _userService.LoginCandidate(userDTO);
+
+            if (data.ErrorCode == 400) return BadRequest(data);
+
+            if (data.ErrorCode == 500) return StatusCode(500, data);
+            
 
             return Ok(data);
         }

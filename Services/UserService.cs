@@ -117,6 +117,24 @@ namespace five_birds_be.Services
 
             return ApiResponse<string>.Success(200, token, "Đăng nhập thành công.");
         }
+        public async Task<ApiResponse<string>> LoginCandidate(UserLoginDTO userLoginDTO)
+        {
+            var user = await _dataContext.User
+                .FirstOrDefaultAsync(u => u.UserName == userLoginDTO.UserName);
+
+            if (user == null)
+                return ApiResponse<string>.Failure(404, "user not found");
+
+            if (user.Password != userLoginDTO.Password)
+            {
+                return ApiResponse<string>.Failure(400, "Incorrect password");
+            }
+
+            var token = _jservice.GenerateJwtToken(user);
+            SetAuthCookie(token);
+
+            return ApiResponse<string>.Success(200, token, "Đăng nhập thành công.");
+        }
 
 
         private void SetAuthCookie(string token)

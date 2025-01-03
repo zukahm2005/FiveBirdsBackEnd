@@ -71,12 +71,11 @@ namespace five_birds_be.Services
             }
 
             var randomPassword = GenerateRandomPassword();
-            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(randomPassword);
-
+            
             var user = new User
             {
                 UserName = username,
-                Password = hashedPassword,
+                Password = randomPassword,
                 Email = request.Email,
                 Role = Role.ROLE_CANDIDATE
             };
@@ -89,8 +88,10 @@ namespace five_birds_be.Services
                 FullName = request.FullName,
                 Email = request.Email,
                 Phone = request.Phone,
+                Birthday = request.Birthday,
                 Education = request.Education,
                 Experience = request.Experience,
+                ApplyLocation = request.ApplyLocation,
                 CvFilePath = filePath,
                 UserId = user.UserId
             };
@@ -135,8 +136,10 @@ namespace five_birds_be.Services
                     FullName = c.FullName,
                     Email = c.Email,
                     Phone = c.Phone,
+                    Birthday = c.Birthday,
                     Education = c.Education,
                     Experience = c.Experience,
+                    ApplyLocation = c.ApplyLocation,
                     CreatedAt = c.CreatedAt
                 })
                 .ToListAsync();
@@ -156,8 +159,10 @@ namespace five_birds_be.Services
                 FullName = candidate.FullName,
                 Email = candidate.Email,
                 Phone = candidate.Phone,
+                Birthday = candidate.Birthday,
                 Education = candidate.Education,
                 Experience = candidate.Experience,
+                ApplyLocation = candidate.ApplyLocation,
                 CreatedAt = candidate.CreatedAt
             };
 
@@ -173,8 +178,10 @@ namespace five_birds_be.Services
             candidate.FullName = request.FullName;
             candidate.Email = request.Email;
             candidate.Phone = request.Phone;
+            candidate.Birthday = request.Birthday;
             candidate.Education = request.Education;
             candidate.Experience = request.Experience;
+            candidate.ApplyLocation = request.ApplyLocation;
 
             _context.Candidates.Update(candidate);
             await _context.SaveChangesAsync();
@@ -192,11 +199,23 @@ namespace five_birds_be.Services
             return ApiResponse<string>.Success(200, "Ứng viên đã được xóa.");
         }
 
-        public async Task<ApiResponse<string>> SendEmailCandidate(int id, EmailRequest body)
+        public async Task<ApiResponse<string>> SendEmailCandidate(int id, EmailRequest emailRequest)
         {
             var candidate = await _context.Candidates.FirstOrDefaultAsync(cd => cd.Id == id);
             if (candidate == null)
                 return ApiResponse<string>.Failure(404, "Không tìm thấy ID ứng viên");
+            
+            var user = await _context.User.FirstOrDefaultAsync(u => u.UserId == candidate.UserId);
+            if (user == null) return ApiResponse<string>.Failure(404, "không tìm thấy Id người dùng");
+
+            var body = new EmailResponse{
+            examTitle = emailRequest.examTitle,
+            comment = emailRequest.comment,
+            selectedTime = emailRequest.selectedTime,
+            selectedDate = emailRequest.selectedDate,
+            UserName = user.UserName,
+            Password = user.Password
+            };
 
             var email = candidate.Email;
             if (string.IsNullOrEmpty(email))

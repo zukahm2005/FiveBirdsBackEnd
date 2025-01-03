@@ -6,19 +6,17 @@ namespace five_birds_be.DTO.Request
     {
         [Required]
         public string FullName { get; set; }
-
         [Required]
         [EmailAddress]
         public string Email { get; set; }
-
         [Required]
         public string Phone { get; set; }
-
+        public string Birthday { get; set; }
         public string Education { get; set; }
-        
         public string Experience { get; set; }
+        public string ApplyLocation { get; set; }
         [Required]
-        public IFormFile CvFile { get; set; }   
+        public IFormFile CvFile { get; set; }
     }
 
 }
