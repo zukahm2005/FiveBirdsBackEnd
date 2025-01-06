@@ -41,5 +41,21 @@ namespace five_birds_be.Controllers
             if (result.ErrorCode == 404) return NotFound(result);
             return Ok(result);
         }
+        [HttpPut("update/{id}")]
+        [Authorize(Roles = "ROLE_ADMIN")]
+        public async Task<IActionResult> put(int id, [FromBody] ResultDTO result)
+        {
+            var data = await _resultService.updateResult(id, result);
+            if (data.ErrorCode == 404) return NotFound(data);
+            return Ok(data);
+        }
+        [HttpDelete("delete/{id}")]
+        [Authorize(Roles = "ROLE_ADMIN")]
+        public async Task<IActionResult> delete(int id)
+        {
+            var result = await _resultService.deleteResult(id);
+            if (result.ErrorCode == 404) return NotFound(result);
+            return Ok(result);
+        }
     }
 }

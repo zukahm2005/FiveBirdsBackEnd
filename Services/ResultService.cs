@@ -169,6 +169,46 @@ namespace five_birds_be.Services
 
             return ApiResponse<object>.Success(200, result, "Retrieve success");
         }
+        public async Task<ApiResponse<ResultResponse>> updateResult(int id, ResultDTO resultDTO){
+            var data = await _dataContext.Result.FirstOrDefaultAsync(r => r.Id == id);
+            if (data == null) return ApiResponse<ResultResponse>.Failure(404,"result not found");
+
+            var user = await _dataContext.User.FirstOrDefaultAsync(u => u.UserId == resultDTO.UserId);  
+            if (user == null) return ApiResponse<ResultResponse>.Failure(404, "user id not found");
+
+            var answers = await _dataContext.Answer.FirstOrDefaultAsync(a => a.Id == resultDTO.AnswerId);
+            if (answers == null) return ApiResponse<ResultResponse>.Failure(404, "answer id not found");
+
+            var question = await _dataContext.Question.FirstOrDefaultAsync(a => a.Id == resultDTO.QuestionId);
+            if (question == null) return ApiResponse<ResultResponse>.Failure(404, "question id not found");
+
+            data.UserId = resultDTO.UserId;
+            data.AnswerId = resultDTO.AnswerId;
+            data.QuestionId = resultDTO.QuestionId;
+            data.AnswerId = resultDTO.ExamAnswer;
+
+            await _dataContext.SaveChangesAsync();
+ 
+            var newData = new ResultResponse{
+                Id = data.Id,
+                UserId = data.UserId,
+                ExamId = data.ExamId,
+                QuestionId = data.QuestionId,
+                AnswerId = data.AnswerId,
+                ExamAnswer = data.ExamAnswer,
+                Is_correct = data.Is_correct
+            };
+            return ApiResponse<ResultResponse>.Success(200, newData);
+        }
+
+        public async Task<ApiResponse<string>> deleteResult(int id){
+            var data = await _dataContext.Result.FirstOrDefaultAsync(r => r.Id == id);
+            if (data == null) return ApiResponse<string>.Failure(404, "result not found");
+
+             _dataContext.Result.Remove(data);
+            await _dataContext.SaveChangesAsync();
+            return ApiResponse<string>.Success(200,"delete result success");
+        }
 
     }
 }
