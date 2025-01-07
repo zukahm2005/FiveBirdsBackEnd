@@ -30,7 +30,6 @@ namespace five_birds_be.Services
                 return ApiResponse<ResultResponse>.Failure(400, "User has already answered this question.");
             }
 
-
             var dataUser = await _dataContext.User.FirstOrDefaultAsync(u => u.UserId == resultDTO.UserId);
             if (dataUser == null) return ApiResponse<ResultResponse>.Failure(400, "Invalid dataUser provided.");
 
@@ -58,6 +57,8 @@ namespace five_birds_be.Services
                 ExamAnswer = resultDTO.ExamAnswer,
                 Is_correct = correct
             };
+            await _dataContext.Result.AddAsync(newResult);
+            await _dataContext.SaveChangesAsync();
 
             var ResultResponse = new ResultResponse
             {
@@ -69,9 +70,6 @@ namespace five_birds_be.Services
                 ExamAnswer = newResult.ExamAnswer,
                 Is_correct = newResult.Is_correct
             };
-
-            await _dataContext.Result.AddAsync(newResult);
-            await _dataContext.SaveChangesAsync();
 
             return ApiResponse<ResultResponse>.Success(200, ResultResponse, "Create result success");
         }
@@ -169,11 +167,12 @@ namespace five_birds_be.Services
 
             return ApiResponse<object>.Success(200, result, "Retrieve success");
         }
-        public async Task<ApiResponse<ResultResponse>> updateResult(int id, ResultDTO resultDTO){
+        public async Task<ApiResponse<ResultResponse>> updateResult(int id, ResultDTO resultDTO)
+        {
             var data = await _dataContext.Result.FirstOrDefaultAsync(r => r.Id == id);
-            if (data == null) return ApiResponse<ResultResponse>.Failure(404,"result not found");
+            if (data == null) return ApiResponse<ResultResponse>.Failure(404, "result not found");
 
-            var user = await _dataContext.User.FirstOrDefaultAsync(u => u.UserId == resultDTO.UserId);  
+            var user = await _dataContext.User.FirstOrDefaultAsync(u => u.UserId == resultDTO.UserId);
             if (user == null) return ApiResponse<ResultResponse>.Failure(404, "user id not found");
 
             var answers = await _dataContext.Answer.FirstOrDefaultAsync(a => a.Id == resultDTO.AnswerId);
@@ -188,8 +187,9 @@ namespace five_birds_be.Services
             data.AnswerId = resultDTO.ExamAnswer;
 
             await _dataContext.SaveChangesAsync();
- 
-            var newData = new ResultResponse{
+
+            var newData = new ResultResponse
+            {
                 Id = data.Id,
                 UserId = data.UserId,
                 ExamId = data.ExamId,
@@ -201,13 +201,14 @@ namespace five_birds_be.Services
             return ApiResponse<ResultResponse>.Success(200, newData);
         }
 
-        public async Task<ApiResponse<string>> deleteResult(int id){
+        public async Task<ApiResponse<string>> deleteResult(int id)
+        {
             var data = await _dataContext.Result.FirstOrDefaultAsync(r => r.Id == id);
             if (data == null) return ApiResponse<string>.Failure(404, "result not found");
 
-             _dataContext.Result.Remove(data);
+            _dataContext.Result.Remove(data);
             await _dataContext.SaveChangesAsync();
-            return ApiResponse<string>.Success(200,"delete result success");
+            return ApiResponse<string>.Success(200, "delete result success");
         }
 
     }
