@@ -1,3 +1,5 @@
+using five_birds_be.DTO.Request;
+
 namespace five_birds_be.DTO.Response
 {
     public class CandidateResponse
@@ -9,7 +11,9 @@ namespace five_birds_be.DTO.Response
         public string Birthday { get; set; }
         public string Education { get; set; }
         public string Experience { get; set; }
-        public string ApplyLocation { get; set; }
+
+        public CandidatePositionResponse CandidatePosition { get; set; }
+
         public string CvFilePath { get; set; }
 
         public UserResponseDTO User { get; set; }

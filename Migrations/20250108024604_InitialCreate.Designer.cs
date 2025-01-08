@@ -11,7 +11,7 @@ using five_birds_be.Data;
 namespace five_birds_be.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20250101152145_InitialCreate")]
+    [Migration("20250108024604_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -69,6 +69,10 @@ namespace five_birds_be.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
+                    b.Property<string>("Birthday")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
 
@@ -107,6 +111,27 @@ namespace five_birds_be.Migrations
                     b.ToTable("Candidates");
                 });
 
+            modelBuilder.Entity("five_birds_be.Models.CandidatePosition", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<int>("CandidateId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CandidateId")
+                        .IsUnique();
+
+                    b.ToTable("CandidatePositions");
+                });
+
             modelBuilder.Entity("five_birds_be.Models.CandidateTest", b =>
                 {
                     b.Property<int>("Id")
@@ -140,6 +165,9 @@ namespace five_birds_be.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
+                    b.Property<int>("CandidatePositionId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("Create_at")
                         .HasColumnType("datetime(6)");
 
@@ -159,6 +187,8 @@ namespace five_birds_be.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CandidatePositionId");
 
                     b.ToTable("Exam");
                 });
@@ -332,6 +362,17 @@ namespace five_birds_be.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("five_birds_be.Models.CandidatePosition", b =>
+                {
+                    b.HasOne("five_birds_be.Models.Candidate", "Candidate")
+                        .WithOne("CandidatePosition")
+                        .HasForeignKey("five_birds_be.Models.CandidatePosition", "CandidateId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Candidate");
+                });
+
             modelBuilder.Entity("five_birds_be.Models.CandidateTest", b =>
                 {
                     b.HasOne("five_birds_be.Models.Exam", "Exam")
@@ -349,6 +390,17 @@ namespace five_birds_be.Migrations
                     b.Navigation("Exam");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("five_birds_be.Models.Exam", b =>
+                {
+                    b.HasOne("five_birds_be.Models.CandidatePosition", "CandidatePosition")
+                        .WithMany("Exams")
+                        .HasForeignKey("CandidatePositionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("CandidatePosition");
                 });
 
             modelBuilder.Entity("five_birds_be.Models.Question", b =>
@@ -418,6 +470,17 @@ namespace five_birds_be.Migrations
                     b.Navigation("Exam");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("five_birds_be.Models.Candidate", b =>
+                {
+                    b.Navigation("CandidatePosition")
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("five_birds_be.Models.CandidatePosition", b =>
+                {
+                    b.Navigation("Exams");
                 });
 
             modelBuilder.Entity("five_birds_be.Models.CandidateTest", b =>

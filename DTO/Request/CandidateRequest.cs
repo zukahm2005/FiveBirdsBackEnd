@@ -14,9 +14,12 @@ namespace five_birds_be.DTO.Request
         public string Birthday { get; set; }
         public string Education { get; set; }
         public string Experience { get; set; }
-        public string ApplyLocation { get; set; }
+        
         [Required]
         public IFormFile CvFile { get; set; }
+
+        [Required]
+        public int CandidatePositionId { get; set; }
     }
 
 }

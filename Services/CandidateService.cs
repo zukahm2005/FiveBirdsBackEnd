@@ -56,6 +56,14 @@ namespace five_birds_be.Services
                 }
             }
 
+            var candidatePosition = await _context.CandidatePositions
+               .FirstOrDefaultAsync(cp => cp.Id == request.CandidatePositionId);
+
+            if (candidatePosition == null)
+            {
+                return ApiResponse<string>.Failure(404, "Không tìm thấy vị trí ứng tuyển.");
+            }
+
             var emailPrefix = request.Email.Split('@')[0];
             var existingUser = await _context.User.FirstOrDefaultAsync(u => u.UserName == emailPrefix);
             string username = emailPrefix;
@@ -86,9 +94,9 @@ namespace five_birds_be.Services
                 Birthday = request.Birthday,
                 Education = request.Education,
                 Experience = request.Experience,
-                ApplyLocation = request.ApplyLocation,
                 CvFilePath = cvUrl,
-                UserId = user.UserId
+                UserId = user.UserId,
+                CandidatePosition = candidatePosition
             };
 
             _context.Candidates.Add(candidate);
@@ -97,13 +105,13 @@ namespace five_birds_be.Services
             string adminEmail = "maituanvu141@gmail.com";
             string emailSubject = "Notifity: Candidate up CV";
             string emailBody = $@"
-        <h2>Information candidate</h2>
-        <p><strong>Full Name:</strong> {request.FullName}</p>
-        <p><strong>Email:</strong> {request.Email}</p>
-        <p><strong>Username:</strong> {username}</p>
-        <p><strong>Password:</strong> {randomPassword}</p>
-        <p>File CV: <a href='{cvUrl}'>Download CV</a></p>
-    ";
+                <h2>Information candidate</h2>
+                <p><strong>Full Name:</strong> {request.FullName}</p>
+                <p><strong>Email:</strong> {request.Email}</p>
+                <p><strong>Username:</strong> {username}</p>
+                <p><strong>Password:</strong> {randomPassword}</p>
+                <p>File CV: <a href='{cvUrl}'>CV Here</a></p>
+            ";
 
             var emailService = new EmailService();
             await emailService.SendEmailAsync(adminEmail, emailSubject, emailBody);
@@ -126,19 +134,33 @@ namespace five_birds_be.Services
         public async Task<ApiResponse<List<CandidateResponse>>> GetCandidatesAsync()
         {
             var candidates = await _context.Candidates
-                .Select(c => new CandidateResponse
-                {
-                    Id = c.Id,
-                    FullName = c.FullName,
-                    Email = c.Email,
-                    Phone = c.Phone,
-                    Birthday = c.Birthday,
-                    Education = c.Education,
-                    Experience = c.Experience,
-                    ApplyLocation = c.ApplyLocation,
-                    CreatedAt = c.CreatedAt
-                })
-                .ToListAsync();
+               .Include(c => c.CandidatePosition)
+               .Include(c => c.User) 
+               .Select(c => new CandidateResponse
+               {
+                   Id = c.Id,
+                   FullName = c.FullName,
+                   Email = c.Email,
+                   Phone = c.Phone,
+                   Birthday = c.Birthday,
+                   Education = c.Education,
+                   Experience = c.Experience,
+                   CvFilePath = c.CvFilePath,
+                   CreatedAt = c.CreatedAt,
+                   CandidatePosition = c.CandidatePosition != null ? new CandidatePositionResponse
+            {
+                Id = c.CandidatePosition.Id,
+                Name = c.CandidatePosition.Name
+            } : null,
+            User = c.User != null ? new UserResponseDTO
+            {
+                UserId = c.User.UserId,
+                UserName = c.User.UserName,
+                Password = c.User.Password,
+                Email = c.User.Email
+            } : null
+        })
+       .ToListAsync();
 
             return ApiResponse<List<CandidateResponse>>.Success(200, candidates);
         }
@@ -146,8 +168,9 @@ namespace five_birds_be.Services
         public async Task<ApiResponse<CandidateResponse>> GetCandidateByIdAsync(int id)
         {
             var candidate = await _context.Candidates
-                .Include(c => c.User)
-                .FirstOrDefaultAsync(c => c.Id == id);
+               .Include(c => c.User)
+               .Include(c => c.CandidatePosition)
+               .FirstOrDefaultAsync(c => c.Id == id);
 
             if (candidate == null)
             {
@@ -163,9 +186,13 @@ namespace five_birds_be.Services
                 Birthday = candidate.Birthday,
                 Education = candidate.Education,
                 Experience = candidate.Experience,
-                ApplyLocation = candidate.ApplyLocation,
-                 CvFilePath = candidate.CvFilePath, 
+                CvFilePath = candidate.CvFilePath,
                 CreatedAt = candidate.CreatedAt,
+                CandidatePosition = new CandidatePositionResponse
+                {
+                    Id = candidate.CandidatePosition.Id,
+                    Name = candidate.CandidatePosition.Name
+                },
                 User = new UserResponseDTO
                 {
                     UserId = candidate.User.UserId,
@@ -178,12 +205,20 @@ namespace five_birds_be.Services
             return ApiResponse<CandidateResponse>.Success(200, response);
         }
 
-
         public async Task<ApiResponse<string>> UpdateCandidateAsync(int id, CandidateRequest request)
         {
-            var candidate = await _context.Candidates.FindAsync(id);
+            var candidate = await _context.Candidates
+                .Include(c => c.CandidatePosition)
+                .FirstOrDefaultAsync(c => c.Id == id);
+
             if (candidate == null)
                 return ApiResponse<string>.Failure(404, "Không tìm thấy ứng viên.");
+
+            var candidatePosition = await _context.CandidatePositions
+                .FirstOrDefaultAsync(cp => cp.Id == request.CandidatePositionId);
+
+            if (candidatePosition == null)
+                return ApiResponse<string>.Failure(404, "Không tìm thấy vị trí ứng tuyển.");
 
             candidate.FullName = request.FullName;
             candidate.Email = request.Email;
@@ -191,12 +226,13 @@ namespace five_birds_be.Services
             candidate.Birthday = request.Birthday;
             candidate.Education = request.Education;
             candidate.Experience = request.Experience;
-            candidate.ApplyLocation = request.ApplyLocation;
+            candidate.CandidatePosition = candidatePosition;
 
             _context.Candidates.Update(candidate);
             await _context.SaveChangesAsync();
             return ApiResponse<string>.Success(200, "Hồ sơ ứng viên đã được cập nhật.");
         }
+
 
         public async Task<ApiResponse<string>> DeleteCandidateAsync(int id)
         {

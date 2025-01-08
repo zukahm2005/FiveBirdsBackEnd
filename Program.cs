@@ -31,8 +31,8 @@ builder.Services.AddControllers()
 
 
 //authentication
-builder.Services.AddAuthentication("CookieOnly")
-    .AddJwtBearer("CookieOnly", options =>
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
     {
         options.TokenValidationParameters = new TokenValidationParameters
         {
@@ -47,16 +47,14 @@ builder.Services.AddAuthentication("CookieOnly")
         {
             OnMessageReceived = context =>
             {
-                if (context.Request.Cookies.ContainsKey("token"))
+                var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+
+                if (string.IsNullOrEmpty(token) && context.Request.Cookies.ContainsKey("token"))
                 {
-                    context.Token = context.Request.Cookies["token"];
-                    Console.WriteLine("Token nhận được từ cookie: " + context.Token);
-                }
-                else
-                {
-                    Console.WriteLine("Không tìm thấy token trong cookie.");
+                    token = context.Request.Cookies["token"];
                 }
 
+                context.Token = token; 
                 return Task.CompletedTask;
             },
 
@@ -68,13 +66,13 @@ builder.Services.AddAuthentication("CookieOnly")
                 if (roleClaim != null)
                 {
                     claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, roleClaim.Value));
-                    Console.WriteLine("Role đã được thêm vào ClaimsIdentity: " + roleClaim.Value);
                 }
 
                 return Task.CompletedTask;
             }
         };
     });
+
 
 
 //cors
@@ -120,6 +118,7 @@ builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<CloudinaryService>();
 builder.Services.AddScoped<EmailService>();
 builder.Services.AddScoped<ICandidateService, CandidateService>();
+builder.Services.AddScoped<ICandidatePositionService, CandidatePositionService>();
 builder.Services.AddSingleton<IWebHostEnvironment>(builder.Environment);
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddMemoryCache();
@@ -134,7 +133,7 @@ builder.Services.AddSwaggerGen(c =>
         Scheme = "Bearer",
         BearerFormat = "JWT",
         In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-        Description = "Bearer token"
+        Description = "Enter 'Bearer' [space] and then your token in the text input below.\nExample: 'Bearer abcdef12345'"
     });
 
     c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
@@ -152,7 +151,6 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 });
-
 
 
 builder.Services.AddControllers();
