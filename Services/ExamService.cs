@@ -19,13 +19,13 @@ namespace five_birds_be.Servi
         public async Task<ApiResponse<Exam>> CreateExam(ExamDTO examDTO)
         {
 
-             var candidatePosition = await _dataContext.CandidatePositions
-        .FirstOrDefaultAsync(cp => cp.Id == examDTO.CandidatePositionId);
+            var candidatePosition = await _dataContext.CandidatePositions
+       .FirstOrDefaultAsync(cp => cp.Id == examDTO.CandidatePositionId);
 
-    if (candidatePosition == null)
-    {
-        return ApiResponse<Exam>.Failure(404, "CandidatePositionId không tồn tại.");
-    }
+            if (candidatePosition == null)
+            {
+                return ApiResponse<Exam>.Failure(404, "CandidatePositionId không tồn tại.");
+            }
 
 
             var newExam = new Exam
@@ -47,7 +47,7 @@ namespace five_birds_be.Servi
             if (pageNumber < 1) pageNumber = 1;
 
             var pageExam = await _dataContext.Exam
-             .Include(exam => exam.CandidatePosition) 
+            .Include(exam => exam.CandidatePosition)
             .Include(exam => exam.Question)
             .ThenInclude(question => question.Answers)
             .Skip((pageNumber - 1) * 10)
@@ -60,11 +60,11 @@ namespace five_birds_be.Servi
                 Title = exam.Title,
                 Description = exam.Description,
                 Duration = exam.Duration,
-                 CandidatePosition = new CandidatePositionResponse
-    {
-        Id = exam.CandidatePosition.Id,
-        Name = exam.CandidatePosition.Name
-    },
+                CandidatePosition = new CandidatePositionResponse
+                {
+                    Id = exam.CandidatePosition.Id,
+                    Name = exam.CandidatePosition.Name
+                },
                 Question = exam.Question.Select(q => new QuestionResponse
                 {
                     Id = q.Id,
@@ -91,6 +91,7 @@ namespace five_birds_be.Servi
         public async Task<ApiResponse<ExamResponse>> getExamById(int Id)
         {
             var exam = await _dataContext.Exam
+                .Include(exam => exam.CandidatePosition)
                 .Include(exam => exam.Question)
                 .ThenInclude(question => question.Answers)
                 .Include(e => e.CandidatePosition)
@@ -105,6 +106,11 @@ namespace five_birds_be.Servi
                 Title = exam.Title,
                 Description = exam.Description,
                 Duration = exam.Duration,
+                CandidatePosition = new CandidatePositionResponse
+                {
+                    Id = exam.CandidatePosition.Id,
+                    Name = exam.CandidatePosition.Name
+                },
                 Question = exam.Question.Select(q => new QuestionResponse
                 {
                     Id = q.Id,
@@ -135,9 +141,9 @@ namespace five_birds_be.Servi
 
             var candidatePosition = await _dataContext.CandidatePositions
         .FirstOrDefaultAsync(cp => cp.Id == examDTO.CandidatePositionId);
-    
-    if (candidatePosition == null)
-        return ApiResponse<ExamResponse>.Failure(404, "CandidatePositionId không tồn tại.");
+
+            if (candidatePosition == null)
+                return ApiResponse<ExamResponse>.Failure(404, "CandidatePositionId không tồn tại.");
 
 
             exam.Id = Id;
@@ -159,12 +165,50 @@ namespace five_birds_be.Servi
             return ApiResponse<ExamResponse>.Success(200, newExamDto, "update exam success");
         }
 
-        public async Task<ApiResponse<object>> getExam(){
-            var data = await _dataContext.Exam.ToListAsync();  
-            return ApiResponse<object>.Success(200, data);
+        public async Task<ApiResponse<List<ExamResponse>>> getExam()
+        {
+            var pageExam = await _dataContext.Exam
+          .Include(exam => exam.CandidatePosition)
+          .Include(exam => exam.Question)
+          .ThenInclude(question => question.Answers)
+          .ToListAsync();
+
+            var examResponses = pageExam.Select(exam => new ExamResponse
+            {
+                Id = exam.Id,
+                Title = exam.Title,
+                Description = exam.Description,
+                Duration = exam.Duration,
+                CandidatePosition = new CandidatePositionResponse
+                {
+                    Id = exam.CandidatePosition.Id,
+                    Name = exam.CandidatePosition.Name
+                },
+                Question = exam.Question.Select(q => new QuestionResponse
+                {
+                    Id = q.Id,
+                    ExamId = q.ExamId,
+                    QuestionExam = q.QuestionExam,
+                    Point = q.Point,
+                    Answers = q.Answers.Select(a => new AnswerResponse
+                    {
+                        Id = a.Id,
+                        QuestionId = a.QuestionId,
+                        QuestionExam = a.Question.QuestionExam,
+                        Answer1 = a.Answer1,
+                        Answer2 = a.Answer2,
+                        Answer3 = a.Answer3,
+                        Answer4 = a.Answer4,
+                        CorrectAnswer = a.CorrectAnswer
+                    }).ToList()
+                }).ToList()
+            }).ToList();
+
+            return ApiResponse<List<ExamResponse>>.Success(200, examResponses, "get all success");
         }
 
-        public async Task<ApiResponse<string>> deleteExam(int id){
+        public async Task<ApiResponse<string>> deleteExam(int id)
+        {
             var exam = await _dataContext.Exam.FirstOrDefaultAsync(x => x.Id == id);
             if (exam == null) return ApiResponse<string>.Failure(404, "id not found");
             _dataContext.Exam.Remove(exam);

@@ -35,21 +35,21 @@ namespace five_birds_be.Controllers
             return Ok(response);
         }
 
-       [HttpPost]
-public async Task<IActionResult> CreateCandidatePosition([FromBody] CandidatePositionRequest request)
-{
-    var response = await _candidatePositionService.CreateCandidatePositionAsync(request);
+        [HttpPost]
+        public async Task<IActionResult> CreateCandidatePosition([FromBody] CandidatePositionRequest request)
+        {
+            var response = await _candidatePositionService.CreateCandidatePositionAsync(request);
 
-    // Kiểm tra trạng thái trả về từ service
-    if (response.ErrorCode == 400)
-        return BadRequest(response);
+            // Kiểm tra trạng thái trả về từ service
+            if (response.ErrorCode == 400)
+                return BadRequest(response);
 
-    // Trả về mã trạng thái 201 khi thành công
-    if (response.ErrorCode == 201)
-        return StatusCode(201, response);
+            // Trả về mã trạng thái 201 khi thành công
+            if (response.ErrorCode == 201)
+                return StatusCode(201, response);
 
-    return Ok(response); // Dành cho các trường hợp khác (nếu cần)
-}
+            return Ok(response); // Dành cho các trường hợp khác (nếu cần)
+        }
 
 
         [HttpPut("{id}")]

@@ -55,26 +55,26 @@ namespace five_birds_be.Services
             return ApiResponse<CandidatePositionResponse>.Success(200, response);
         }
 
-       public async Task<ApiResponse<string>> CreateCandidatePositionAsync(CandidatePositionRequest request)
-{
-    // Kiểm tra nếu tên vị trí đã tồn tại
-    if (await _context.CandidatePositions.AnyAsync(cp => cp.Name == request.Name))
-    {
-        return ApiResponse<string>.Failure(400, "Tên vị trí ứng viên đã tồn tại.");
-    }
+        public async Task<ApiResponse<string>> CreateCandidatePositionAsync(CandidatePositionRequest request)
+        {
+            // Kiểm tra nếu tên vị trí đã tồn tại
+            if (await _context.CandidatePositions.AnyAsync(cp => cp.Name == request.Name))
+            {
+                return ApiResponse<string>.Failure(400, "Tên vị trí ứng viên đã tồn tại.");
+            }
 
-    // Tạo mới CandidatePosition
-    var candidatePosition = new CandidatePosition
-    {
-        Name = request.Name,
-    };
+            // Tạo mới CandidatePosition
+            var candidatePosition = new CandidatePosition
+            {
+                Name = request.Name,
+            };
 
-    _context.CandidatePositions.Add(candidatePosition);
-    await _context.SaveChangesAsync();
+            _context.CandidatePositions.Add(candidatePosition);
+            await _context.SaveChangesAsync();
 
-    // Trả về trạng thái thành công với mã 201
-    return ApiResponse<string>.Success(201, "Tạo mới vị trí ứng viên thành công.");
-}
+            // Trả về trạng thái thành công với mã 201
+            return ApiResponse<string>.Success(201, "Tạo mới vị trí ứng viên thành công.");
+        }
 
 
         public async Task<ApiResponse<string>> UpdateCandidatePositionAsync(int id, CandidatePositionRequest request)

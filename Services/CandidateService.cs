@@ -135,7 +135,7 @@ namespace five_birds_be.Services
         {
             var candidates = await _context.Candidates
                .Include(c => c.CandidatePosition)
-               .Include(c => c.User) 
+               .Include(c => c.User)
                .Select(c => new CandidateResponse
                {
                    Id = c.Id,
@@ -148,18 +148,18 @@ namespace five_birds_be.Services
                    CvFilePath = c.CvFilePath,
                    CreatedAt = c.CreatedAt,
                    CandidatePosition = c.CandidatePosition != null ? new CandidatePositionResponse
-            {
-                Id = c.CandidatePosition.Id,
-                Name = c.CandidatePosition.Name
-            } : null,
-            User = c.User != null ? new UserResponseDTO
-            {
-                UserId = c.User.UserId,
-                UserName = c.User.UserName,
-                Password = c.User.Password,
-                Email = c.User.Email
-            } : null
-        })
+                   {
+                       Id = c.CandidatePosition.Id,
+                       Name = c.CandidatePosition.Name
+                   } : null,
+                   User = c.User != null ? new UserResponseDTO
+                   {
+                       UserId = c.User.UserId,
+                       UserName = c.User.UserName,
+                       Password = c.User.Password,
+                       Email = c.User.Email
+                   } : null
+               })
        .ToListAsync();
 
             return ApiResponse<List<CandidateResponse>>.Success(200, candidates);

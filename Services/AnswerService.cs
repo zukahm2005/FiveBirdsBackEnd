@@ -105,7 +105,8 @@ namespace five_birds_be.Services
             return ApiResponse<AnswerDTO>.Success(200, newAnswerDto, "update answer success");
         }
 
-        public async Task<ApiResponse<string>> deleteAnswer(int id){
+        public async Task<ApiResponse<string>> deleteAnswer(int id)
+        {
             var answer = await _dataContext.Answer.FirstOrDefaultAsync(a => a.Id == id);
             if (answer == null) return ApiResponse<string>.Failure(404, "id answer not found");
             _dataContext.Answer.Remove(answer);

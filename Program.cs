@@ -55,7 +55,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                     token = context.Request.Cookies["token"];
                 }
 
-                context.Token = token; 
+                context.Token = token;
                 return Task.CompletedTask;
             },
 
