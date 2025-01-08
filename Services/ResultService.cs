@@ -18,61 +18,91 @@ namespace five_birds_be.Services
             _dataContext = dataContext;
         }
 
-        public async Task<ApiResponse<ResultResponse>> PostResult(ResultDTO resultDTO)
+        public async Task<ApiResponse<List<ResultResponse>>> PostResults(List<ResultDTO> resultDTOs)
         {
-            var existingResult = await _dataContext.Result
-         .FirstOrDefaultAsync(r => r.UserId == resultDTO.UserId
-                                   && r.ExamId == resultDTO.ExamId
-                                   && r.QuestionId == resultDTO.QuestionId);
+            using var transaction = await _dataContext.Database.BeginTransactionAsync();
 
-            if (existingResult != null)
+            try
             {
-                return ApiResponse<ResultResponse>.Failure(400, "User has already answered this question.");
+                var resultResponses = new List<ResultResponse>();
+
+                var userIds = resultDTOs.Select(r => r.UserId).Distinct();
+                var examIds = resultDTOs.Select(r => r.ExamId).Distinct();
+                var questionIds = resultDTOs.Select(r => r.QuestionId).Distinct();
+                var answerIds = resultDTOs.Select(r => r.AnswerId).Distinct();
+
+                var existingResults = await _dataContext.Result
+                    .Where(r => userIds.Contains(r.UserId) && examIds.Contains(r.ExamId) && questionIds.Contains(r.QuestionId))
+                    .ToListAsync();
+
+                var users = await _dataContext.User.Where(u => userIds.Contains(u.UserId)).ToListAsync();
+                var exams = await _dataContext.Exam.Where(e => examIds.Contains(e.Id)).ToListAsync();
+                var questions = await _dataContext.Question.Where(q => questionIds.Contains(q.Id)).ToListAsync();
+                var answers = await _dataContext.Answer.Where(a => answerIds.Contains(a.Id)).ToListAsync();
+
+                foreach (var resultDTO in resultDTOs)
+                {
+                    if (existingResults.Any(r => r.UserId == resultDTO.UserId && r.ExamId == resultDTO.ExamId && r.QuestionId == resultDTO.QuestionId))
+                    {
+                        throw new Exception($"User has already answered question ID: {resultDTO.QuestionId}.");
+                    }
+
+                    var user = users.FirstOrDefault(u => u.UserId == resultDTO.UserId);
+                    if (user == null) throw new Exception($"Invalid UserId: {resultDTO.UserId}.");
+
+                    var exam = exams.FirstOrDefault(e => e.Id == resultDTO.ExamId);
+                    if (exam == null) throw new Exception($"Invalid ExamId: {resultDTO.ExamId}.");
+
+                    var question = questions.FirstOrDefault(q => q.Id == resultDTO.QuestionId);
+                    if (question == null) throw new Exception($"Invalid QuestionId: {resultDTO.QuestionId}.");
+
+                    var answer = answers.FirstOrDefault(a => a.Id == resultDTO.AnswerId);
+                    if (answer == null) throw new Exception($"Invalid AnswerId: {resultDTO.AnswerId}.");
+
+                    bool correct = answer.CorrectAnswer == resultDTO.ExamAnswer;
+
+                    var newResult = new Result
+                    {
+                        UserId = resultDTO.UserId,
+                        User = user,
+                        ExamId = resultDTO.ExamId,
+                        Exam = exam,
+                        QuestionId = resultDTO.QuestionId,
+                        Questions = question,
+                        AnswerId = resultDTO.AnswerId,
+                        Answer = answer,
+                        ExamAnswer = resultDTO.ExamAnswer,
+                        Is_correct = correct
+                    };
+
+                    await _dataContext.Result.AddAsync(newResult);
+
+                    resultResponses.Add(new ResultResponse
+                    {
+                        Id = newResult.Id,
+                        UserId = newResult.UserId,
+                        ExamId = newResult.ExamId,
+                        QuestionId = newResult.QuestionId,
+                        AnswerId = newResult.AnswerId,
+                        ExamAnswer = newResult.ExamAnswer,
+                        Is_correct = newResult.Is_correct
+                    });
+                }
+
+                await _dataContext.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+
+                return ApiResponse<List<ResultResponse>>.Success(200, resultResponses, "All results created successfully");
             }
-
-            var dataUser = await _dataContext.User.FirstOrDefaultAsync(u => u.UserId == resultDTO.UserId);
-            if (dataUser == null) return ApiResponse<ResultResponse>.Failure(400, "Invalid dataUser provided.");
-
-            var dataExam = await _dataContext.Exam.FirstOrDefaultAsync(u => u.Id == resultDTO.ExamId);
-            if (dataExam == null) return ApiResponse<ResultResponse>.Failure(400, "Invalid dataExam provided.");
-
-            var dataQuestion = await _dataContext.Question.FirstOrDefaultAsync(u => u.Id == resultDTO.QuestionId);
-            if (dataQuestion == null) return ApiResponse<ResultResponse>.Failure(400, "Invalid dataQuestion provided.");
-
-            var dataAnswer = await _dataContext.Answer.FirstOrDefaultAsync(u => u.Id == resultDTO.AnswerId);
-            if (dataAnswer == null) return ApiResponse<ResultResponse>.Failure(400, "Invalid dataAnswer provided.");
-
-            bool correct = dataAnswer.CorrectAnswer == resultDTO.ExamAnswer;
-
-            var newResult = new Result
+            catch (Exception ex)
             {
-                UserId = resultDTO.UserId,
-                User = dataUser,
-                ExamId = resultDTO.ExamId,
-                Exam = dataExam,
-                QuestionId = resultDTO.QuestionId,
-                Questions = dataQuestion,
-                AnswerId = resultDTO.AnswerId,
-                Answer = dataAnswer,
-                ExamAnswer = resultDTO.ExamAnswer,
-                Is_correct = correct
-            };
-            await _dataContext.Result.AddAsync(newResult);
-            await _dataContext.SaveChangesAsync();
-
-            var ResultResponse = new ResultResponse
-            {
-                Id = newResult.Id,
-                UserId = newResult.UserId,
-                ExamId = newResult.ExamId,
-                QuestionId = newResult.QuestionId,
-                AnswerId = newResult.AnswerId,
-                ExamAnswer = newResult.ExamAnswer,
-                Is_correct = newResult.Is_correct
-            };
-
-            return ApiResponse<ResultResponse>.Success(200, ResultResponse, "Create result success");
+                await transaction.RollbackAsync();
+                return ApiResponse<List<ResultResponse>>.Failure(400, ex.Message);
+            }
         }
+
+
 
         public async Task<ApiResponse<object>> GetAll(int pageNumber, int pageSize)
         {
