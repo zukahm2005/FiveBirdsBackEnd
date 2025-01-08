@@ -66,6 +66,9 @@ public class EmailService
                                             <h3> Please use this account to log in. <h3>
                                             <p style='font-size: 16px; margin: 10px 0;'><strong>UserName:</strong> {body.UserName}</p>
                                             <p style='font-size: 16px; margin: 10px 0;'><strong>Password:</strong> {body.Password}</p>
+        
+                                            <br/>
+                                            <p>Click link: <a href='http://46.202.178.139:5173/login'> Login Exam </a> </p>
                                          </td>
                                         </tr>
                                         <tr>

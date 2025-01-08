@@ -16,7 +16,7 @@ namespace five_birds_be.Services
             _dataContext = dataContext;
         }
 
-        public async Task<ApiResponse<UserExamResponse>> postUserExam(UserExamRequest userExamRequest)
+        public async Task<ApiResponse<UserExamResponse>> postUserExam(UserExamEditRequest userExamRequest)
         {
             var user = await _dataContext.User.FirstOrDefaultAsync(u => u.UserId == userExamRequest.UserId);
             if (user == null) return ApiResponse<UserExamResponse>.Failure(404, "userId not found");
@@ -29,7 +29,6 @@ namespace five_birds_be.Services
                 User = user,
                 ExamId = userExamRequest.ExamId,
                 Exam = exam,
-                TestStatus = userExamRequest.TestStatus,
                 ExamTime = userExamRequest.ExamTime,
                 ExamDate = userExamRequest.ExamDate,
             };
@@ -41,7 +40,7 @@ namespace five_birds_be.Services
                 Id = newUserExam.Id,
                 UserId = newUserExam.UserId,
                 ExamId = newUserExam.ExamId,
-                TestStatus = newUserExam.TestStatus,
+                TestStatus = Status.PENDING,
                 ExamTime = newUserExam.ExamTime,
                 ExamDate = newUserExam.ExamDate,
             };

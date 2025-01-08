@@ -18,7 +18,7 @@ namespace five_birds_be.Controllers
 
         [HttpPost("add")]
         [Authorize(Roles = "ROLE_ADMIN")]
-        public async Task<ActionResult> add(UserExamRequest userExamRequest)
+        public async Task<ActionResult> add(UserExamEditRequest userExamRequest)
         {
             var data = await _userExamService.postUserExam(userExamRequest);
             return Ok(data);
