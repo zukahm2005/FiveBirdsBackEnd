@@ -15,6 +15,7 @@ namespace five_birds_be.Services
         Task<ApiResponse<string>> UpdateCandidateAsync(int id, CandidateRequest request);
         Task<ApiResponse<string>> DeleteCandidateAsync(int id);
         Task<ApiResponse<string>> SendEmailCandidate(int id, EmailRequest body);
+        Task<ApiResponse<List<CandidateResponse>>> GetCandidatesPage(int pageNumber, int pageSize, StatusEmail statusEmail);
 
     }
 
@@ -146,6 +147,7 @@ namespace five_birds_be.Services
                    Education = c.Education,
                    Experience = c.Experience,
                    CvFilePath = c.CvFilePath,
+                   StatusEmail = c.StatusEmail,
                    CreatedAt = c.CreatedAt,
                    CandidatePosition = c.CandidatePosition != null ? new CandidatePositionResponse
                    {
@@ -161,6 +163,49 @@ namespace five_birds_be.Services
                    } : null
                })
        .ToListAsync();
+
+            return ApiResponse<List<CandidateResponse>>.Success(200, candidates);
+        }
+
+        public async Task<ApiResponse<List<CandidateResponse>>> GetCandidatesPage(int pageNumber, int pageSize, StatusEmail statusEmail)
+        {
+            // Base query
+            var query = _context.Candidates
+                .Include(c => c.CandidatePosition)
+                .Include(c => c.User)
+                .Where(c => c.StatusEmail == statusEmail) // Filter by StatusEmail
+                .AsQueryable();
+
+            // Apply pagination
+            var candidates = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .Select(c => new CandidateResponse
+                {
+                    Id = c.Id,
+                    FullName = c.FullName,
+                    Email = c.Email,
+                    Phone = c.Phone,
+                    Birthday = c.Birthday,
+                    Education = c.Education,
+                    Experience = c.Experience,
+                    CvFilePath = c.CvFilePath,
+                    StatusEmail = c.StatusEmail,
+                    CreatedAt = c.CreatedAt,
+                    CandidatePosition = c.CandidatePosition != null ? new CandidatePositionResponse
+                    {
+                        Id = c.CandidatePosition.Id,
+                        Name = c.CandidatePosition.Name
+                    } : null,
+                    User = c.User != null ? new UserResponseDTO
+                    {
+                        UserId = c.User.UserId,
+                        UserName = c.User.UserName,
+                        Password = c.User.Password,
+                        Email = c.User.Email
+                    } : null
+                })
+                .ToListAsync();
 
             return ApiResponse<List<CandidateResponse>>.Success(200, candidates);
         }
@@ -253,6 +298,9 @@ namespace five_birds_be.Services
 
             var user = await _context.User.FirstOrDefaultAsync(u => u.UserId == candidate.UserId);
             if (user == null) return ApiResponse<string>.Failure(404, "không tìm thấy Id người dùng");
+
+            candidate.StatusEmail = StatusEmail.SUCCESS;
+            await _context.SaveChangesAsync();
 
             var body = new EmailResponse
             {

@@ -1,4 +1,5 @@
 using five_birds_be.DTO.Request;
+using five_birds_be.Models;
 using five_birds_be.Response;
 using five_birds_be.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -35,6 +36,14 @@ namespace five_birds_be.Controllers
         public async Task<IActionResult> GetCandidates()
         {
             var response = await _candidateService.GetCandidatesAsync();
+            return Ok(response);
+        }
+
+        [HttpGet("get/all")]
+        [Authorize(Roles = "ROLE_ADMIN")]
+        public async Task<IActionResult> GetCandidatesPage(int pageNumber, int pageSize, StatusEmail statusEmail)
+        {
+            var response = await _candidateService.GetCandidatesPage(pageNumber, pageSize, statusEmail);
             return Ok(response);
         }
 

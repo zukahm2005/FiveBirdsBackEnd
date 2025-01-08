@@ -1,4 +1,5 @@
 using five_birds_be.DTO.Request;
+using five_birds_be.Models;
 
 namespace five_birds_be.DTO.Response
 {
@@ -15,6 +16,7 @@ namespace five_birds_be.DTO.Response
         public CandidatePositionResponse CandidatePosition { get; set; }
 
         public string CvFilePath { get; set; }
+        public StatusEmail StatusEmail { get; set; } = StatusEmail.PENDING;
 
         public UserResponseDTO User { get; set; }
 
