@@ -19,7 +19,6 @@ namespace five_birds_be.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "ROLE_ADMIN")]
         public async Task<IActionResult> GetAllCandidatePositions()
         {
             var response = await _candidatePositionService.GetAllCandidatePositionsAsync();
@@ -27,7 +26,6 @@ namespace five_birds_be.Controllers
         }
 
         [HttpGet("{id}")]
-        [Authorize(Roles = "ROLE_ADMIN")]
         public async Task<IActionResult> GetCandidatePositionById(int id)
         {
             var response = await _candidatePositionService.GetCandidatePositionByIdAsync(id);
@@ -38,7 +36,6 @@ namespace five_birds_be.Controllers
         }
 
        [HttpPost]
-[Authorize(Roles = "ROLE_ADMIN")]
 public async Task<IActionResult> CreateCandidatePosition([FromBody] CandidatePositionRequest request)
 {
     var response = await _candidatePositionService.CreateCandidatePositionAsync(request);
@@ -56,7 +53,6 @@ public async Task<IActionResult> CreateCandidatePosition([FromBody] CandidatePos
 
 
         [HttpPut("{id}")]
-        [Authorize(Roles = "ROLE_ADMIN")]
         public async Task<IActionResult> UpdateCandidatePosition(int id, [FromBody] CandidatePositionRequest request)
         {
             if (!ModelState.IsValid)
@@ -70,7 +66,6 @@ public async Task<IActionResult> CreateCandidatePosition([FromBody] CandidatePos
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Roles = "ROLE_ADMIN")]
         public async Task<IActionResult> DeleteCandidatePosition(int id)
         {
             var response = await _candidatePositionService.DeleteCandidatePositionAsync(id);

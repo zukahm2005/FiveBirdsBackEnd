@@ -1,3 +1,4 @@
+using five_birds_be.DTO.Request;
 using five_birds_be.Models;
 
 namespace five_birds_be.DTO.Response
@@ -9,5 +10,7 @@ namespace five_birds_be.DTO.Response
         public string Description { get; set; }
         public string Duration { get; set; }
         public List<QuestionResponse> Question { get; set; } = new List<QuestionResponse>();
+
+         public CandidatePositionResponse CandidatePosition { get; set; }
     }
 }

@@ -1,5 +1,6 @@
 using five_birds_be.Data;
 using five_birds_be.Dto;
+using five_birds_be.DTO.Request;
 using five_birds_be.DTO.Response;
 using five_birds_be.Models;
 using five_birds_be.Response;
@@ -17,11 +18,22 @@ namespace five_birds_be.Servi
         }
         public async Task<ApiResponse<Exam>> CreateExam(ExamDTO examDTO)
         {
+
+             var candidatePosition = await _dataContext.CandidatePositions
+        .FirstOrDefaultAsync(cp => cp.Id == examDTO.CandidatePositionId);
+
+    if (candidatePosition == null)
+    {
+        return ApiResponse<Exam>.Failure(404, "CandidatePositionId không tồn tại.");
+    }
+
+
             var newExam = new Exam
             {
                 Title = examDTO.Title,
                 Description = examDTO.Description,
                 Duration = examDTO.Duration,
+                CandidatePositionId = examDTO.CandidatePositionId,
             };
 
             await _dataContext.Exam.AddAsync(newExam);
@@ -35,6 +47,7 @@ namespace five_birds_be.Servi
             if (pageNumber < 1) pageNumber = 1;
 
             var pageExam = await _dataContext.Exam
+             .Include(exam => exam.CandidatePosition) 
             .Include(exam => exam.Question)
             .ThenInclude(question => question.Answers)
             .Skip((pageNumber - 1) * 10)
@@ -47,6 +60,11 @@ namespace five_birds_be.Servi
                 Title = exam.Title,
                 Description = exam.Description,
                 Duration = exam.Duration,
+                 CandidatePosition = new CandidatePositionResponse
+    {
+        Id = exam.CandidatePosition.Id,
+        Name = exam.CandidatePosition.Name
+    },
                 Question = exam.Question.Select(q => new QuestionResponse
                 {
                     Id = q.Id,
@@ -75,6 +93,7 @@ namespace five_birds_be.Servi
             var exam = await _dataContext.Exam
                 .Include(exam => exam.Question)
                 .ThenInclude(question => question.Answers)
+                .Include(e => e.CandidatePosition)
                 .FirstOrDefaultAsync(c => c.Id == Id);
 
             if (exam == null)
@@ -114,10 +133,18 @@ namespace five_birds_be.Servi
             var exam = await _dataContext.Exam.FindAsync(Id);
             if (exam == null) return ApiResponse<ExamResponse>.Failure(404, "id exam notfound");
 
+            var candidatePosition = await _dataContext.CandidatePositions
+        .FirstOrDefaultAsync(cp => cp.Id == examDTO.CandidatePositionId);
+    
+    if (candidatePosition == null)
+        return ApiResponse<ExamResponse>.Failure(404, "CandidatePositionId không tồn tại.");
+
+
             exam.Id = Id;
             exam.Title = examDTO.Title;
             exam.Description = examDTO.Description;
             exam.Duration = examDTO.Duration;
+            exam.CandidatePositionId = examDTO.CandidatePositionId;
             exam.Update_at = DateTime.Now;
 
             var newExamDto = new ExamResponse
