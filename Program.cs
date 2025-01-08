@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using five_birds_be.Servi;
+using Microsoft.AspNetCore.Http.Features;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -101,7 +102,16 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 });
 
 
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 50 * 1024 * 1024;
+});
 
+
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    serverOptions.Limits.MaxRequestBodySize = 50 * 1024 * 1024; // 50MB
+});
 
 
 builder.WebHost.UseUrls("http://0.0.0.0:5005");
@@ -160,6 +170,13 @@ builder.Services.AddEndpointsApiExplorer();
 
 
 var app = builder.Build();
+
+
+app.Use(async (context, next) =>
+{
+    context.Features.Get<IHttpMaxRequestBodySizeFeature>().MaxRequestBodySize = 50 * 1024 * 1024; // 50MB
+    await next.Invoke();
+});
 
 
 app.UseCookiePolicy(new CookiePolicyOptions
