@@ -15,7 +15,7 @@ namespace five_birds_be.Services
         Task<ApiResponse<string>> UpdateCandidateAsync(int id, CandidateRequest request);
         Task<ApiResponse<string>> DeleteCandidateAsync(int id);
         Task<ApiResponse<string>> SendEmailCandidate(int id, EmailRequest body);
-        Task<ApiResponse<List<CandidateResponse>>> GetCandidatesPage(int pageNumber, int pageSize, StatusEmail statusEmail, int? CandidatePositionId);
+        Task<ApiResponse<List<CandidateResponse>>> GetCandidatesPage(int pageNumber, int pageSize, StatusEmail? statusEmail, int? CandidatePositionId);
 
     }
 
@@ -167,12 +167,19 @@ namespace five_birds_be.Services
             return ApiResponse<List<CandidateResponse>>.Success(200, candidates);
         }
 
-        public async Task<ApiResponse<List<CandidateResponse>>> GetCandidatesPage(int pageNumber, int pageSize, StatusEmail statusEmail, int? CandidatePositionId)
+        public async Task<ApiResponse<List<CandidateResponse>>> GetCandidatesPage(int pageNumber, int pageSize, StatusEmail? statusEmail, int? CandidatePositionId)
         {
+            Console.WriteLine("sdasdfasdf" + statusEmail);
+
             var query = _context.Candidates
                 .Include(c => c.CandidatePosition)
                 .Include(c => c.User)
-                .Where(c => c.StatusEmail == statusEmail);
+                .AsQueryable();
+
+            if (statusEmail == StatusEmail.SUCCESS || statusEmail == StatusEmail.PENDING)
+            {
+                query = query.Where(c => c.StatusEmail == statusEmail);
+            }
 
             if (CandidatePositionId.HasValue)
             {

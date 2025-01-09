@@ -3,7 +3,6 @@ namespace five_birds_be.Models
     public enum StatusEmail{
         PENDING,
         SUCCESS
-
     }
     public class Candidate
     {
@@ -19,7 +18,6 @@ namespace five_birds_be.Models
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public int UserId { get; set; }
         public User User { get; set; }
-
          public CandidatePosition CandidatePosition { get; set; }
     }
 }
