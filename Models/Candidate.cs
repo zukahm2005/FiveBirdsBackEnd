@@ -3,7 +3,6 @@ namespace five_birds_be.Models
     public enum StatusEmail{
         PENDING,
         SUCCESS
-
     }
     public class Candidate
     {
