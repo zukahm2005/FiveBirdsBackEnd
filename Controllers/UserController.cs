@@ -36,9 +36,20 @@ namespace five_birds_be.Controllers
 
         [HttpPost("register")]
         [Authorize(Roles = "ROLE_ADMIN")]
-        public async Task<IActionResult> Register([FromBody] UserDTO user)
+        public async Task<IActionResult> Register([FromBody] UserRegister user)
         {
             var postUser = await _userService.Register(user);
+
+            if (postUser.ErrorCode == 400) return BadRequest(postUser);
+
+            return Ok(postUser);
+        }
+
+        [HttpPost("register-admin")]
+        [Authorize(Roles = "ROLE_ADMIN")]
+        public async Task<IActionResult> RegisterAdmin([FromBody] UserRegister user)
+        {
+            var postUser = await _userService.RegisterAdmin(user);
 
             if (postUser.ErrorCode == 400) return BadRequest(postUser);
 

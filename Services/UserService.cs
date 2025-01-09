@@ -40,7 +40,7 @@ namespace five_birds_be.Services
                 .ToListAsync();
         }
 
-        public async Task<ApiResponse<string>> Register(UserDTO userDTO)
+        public async Task<ApiResponse<string>> Register(UserRegister userDTO)
         {
             var existingUsers = await _dataContext.User.FirstOrDefaultAsync(u => u.Email == userDTO.Email);
             if (existingUsers != null)
@@ -54,6 +54,29 @@ namespace five_birds_be.Services
             {
                 UserName = userDTO.UserName,
                 Email = userDTO.Email,
+                Password = BCrypt.Net.BCrypt.HashPassword(userDTO.Password),
+                Create_at = DateTime.UtcNow
+            };
+            await _dataContext.User.AddAsync(newUserDTO);
+            await _dataContext.SaveChangesAsync();
+
+            return ApiResponse<string>.Success(200, null, "Account created successfully and confirmation email sent.");
+        }
+        public async Task<ApiResponse<string>> RegisterAdmin(UserRegister userDTO)
+        {
+            var existingUsers = await _dataContext.User.FirstOrDefaultAsync(u => u.Email == userDTO.Email);
+            if (existingUsers != null)
+            {
+                return ApiResponse<string>.Failure(400, "Email already in User.");
+            }
+            var UserName = await _dataContext.User.FirstOrDefaultAsync(u => u.UserName == userDTO.UserName);
+            if (UserName != null) return ApiResponse<string>.Failure(400, " UserName already in User");
+
+            var newUserDTO = new User
+            {
+                UserName = userDTO.UserName,
+                Email = userDTO.Email,
+                Role = Role.ROLE_ADMIN,
                 Password = BCrypt.Net.BCrypt.HashPassword(userDTO.Password),
                 Create_at = DateTime.UtcNow
             };
