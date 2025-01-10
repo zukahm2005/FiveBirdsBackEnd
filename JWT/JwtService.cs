@@ -46,25 +46,25 @@ namespace five_birds_be.Jwt
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        public int? GetUserIdFromHttpContext()
-        {
-            var token = _httpContextAccessor.HttpContext?.Request.Cookies["token"];
+        // public int? GetUserIdFromHttpContext()
+        // {
+        //     var token = _httpContextAccessor.HttpContext?.Request.Cookies["token"];
 
-            if (string.IsNullOrEmpty(token))
-            {
-                return null;
-            }
+        //     if (string.IsNullOrEmpty(token))
+        //     {
+        //         return null;
+        //     }
 
-            var handler = new JwtSecurityTokenHandler();
-            var jwtToken = handler.ReadJwtToken(token);
+        //     var handler = new JwtSecurityTokenHandler();
+        //     var jwtToken = handler.ReadJwtToken(token);
 
-            var userIdClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "UserId");
-            if (userIdClaim != null && int.TryParse(userIdClaim.Value, out int userId))
-            {
-                return userId;
-            }
-            return null;
-        }
+        //     var userIdClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "UserId");
+        //     if (userIdClaim != null && int.TryParse(userIdClaim.Value, out int userId))
+        //     {
+        //         return userId;
+        //     }
+        //     return null;
+        // }
     }
 
 
