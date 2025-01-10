@@ -130,6 +130,8 @@ builder.Services.AddScoped<EmailService>();
 builder.Services.AddScoped<ICandidateService, CandidateService>();
 builder.Services.AddScoped<ICandidatePositionService, CandidatePositionService>();
 builder.Services.AddSingleton<IWebHostEnvironment>(builder.Environment);
+builder.Services.AddScoped<ExcelService>();
+builder.Services.AddScoped<GoogleSheetService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddMemoryCache();
 builder.WebHost.UseWebRoot("wwwroot");
