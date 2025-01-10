@@ -246,6 +246,18 @@ namespace five_birds_be.Services
                 return ApiResponse<CandidateResponse>.Failure(404, "Candidate not found.");
             }
 
+            var userData = candidate.User;
+            if (userData == null)
+            {
+                return ApiResponse<CandidateResponse>.Failure(404, "User not found for the candidate.");
+            }   
+            var userId = userData.UserId;
+
+            var candidateTest = await _context.CandidateTests.FirstOrDefaultAsync(ct => ct.UserId == userId);
+            var IsPast = candidateTest?.IsPast;
+
+
+
             var response = new CandidateResponse
             {
                 Id = candidate.Id,
@@ -268,9 +280,13 @@ namespace five_birds_be.Services
                     UserName = candidate.User.UserName,
                     Email = candidate.User.Email,
                     Password = candidate.User.Password
-                }
+                },
             };
 
+            if (IsPast != null)
+            {
+                response.IsPast = IsPast;
+            }
             return ApiResponse<CandidateResponse>.Success(200, response);
         }
 

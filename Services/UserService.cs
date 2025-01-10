@@ -102,16 +102,16 @@ namespace five_birds_be.Services
 
             if (user == null) return ApiResponse<UserResponseDTO>.Failure(404, " UserId NotFound");
 
-            // if (!BCrypt.Net.BCrypt.Verify(userDTO.Password, user.Password))
-            //     return ApiResponse<UserResponseDTO>.Failure(400, "Incorrect password");
+            if (!BCrypt.Net.BCrypt.Verify(userDTO.Password, user.Password))
+                return ApiResponse<UserResponseDTO>.Failure(400, "Incorrect password");
 
-            // if (!string.IsNullOrEmpty(userDTO.NewPassword))
-            // {
-            //     if (userDTO.NewPassword.Length < 6)
-            //         return ApiResponse<UserResponseDTO>.Failure(400, "Password must be at least 6 characters long");
+            if (!string.IsNullOrEmpty(userDTO.NewPassword))
+            {
+                if (userDTO.NewPassword.Length < 6)
+                    return ApiResponse<UserResponseDTO>.Failure(400, "Password must be at least 6 characters long");
 
-            //     user.Password = BCrypt.Net.BCrypt.HashPassword(userDTO.NewPassword);
-            // }
+                user.Password = BCrypt.Net.BCrypt.HashPassword(userDTO.NewPassword);
+            }
 
             user.UserName = userDTO.UserName;
             user.Email = userDTO.Email;

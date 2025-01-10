@@ -16,9 +16,11 @@ namespace five_birds_be.DTO.Response
         public CandidatePositionResponse CandidatePosition { get; set; }
 
         public string CvFilePath { get; set; }
-        public StatusEmail StatusEmail { get; set; } = StatusEmail.PENDING;
+        public StatusEmail StatusEmail { get; set; }
 
         public UserResponseDTO User { get; set; }
+
+        public bool? IsPast { get; set; }
 
         public DateTime CreatedAt { get; set; }
     }

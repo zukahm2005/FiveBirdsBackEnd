@@ -166,8 +166,24 @@ namespace five_birds_be.Services
             try
             {
                 var data = await _dataContext.CandidateTests
+                    .Include(u => u.User)
+                    .Include(u => u.Exam)
                     .Skip((pageNumber - 1) * pageSize)
-                    .Take(pageSize)
+                    .Take(pageSize) 
+                    .ToListAsync();
+
+                return ApiResponse<object>.Success(200, data, "Get all success");
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<object>.Failure(500, $"Error: {ex.Message}");
+            }
+        }
+         public async Task<ApiResponse<object>> Get()
+        {
+            try
+            {
+                var data = await _dataContext.CandidateTests
                     .ToListAsync();
 
                 return ApiResponse<object>.Success(200, data, "Get all success");

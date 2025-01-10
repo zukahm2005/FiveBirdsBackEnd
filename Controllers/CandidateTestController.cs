@@ -43,5 +43,12 @@ namespace five_birds_be.Controllers
             var data = await _candidateTestService.GetAll(pageNumber, pageSize);
             return Ok(data);
         }
+         [HttpGet("get")]
+        [Authorize(Roles = "ROLE_ADMIN")]
+        public async Task<IActionResult> Get()
+        {
+            var data = await _candidateTestService.Get();
+            return Ok(data);
+        }
     }
 }
