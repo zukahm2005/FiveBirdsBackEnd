@@ -55,7 +55,7 @@ namespace five_birds_be.Services
 
             bool IsPast;
 
-            if (newPoint >= 80) { IsPast = true; }
+            if (newPoint >= 70) { IsPast = true; }
             else { IsPast = false; }
 
             var newCandidateTest = new CandidateTest

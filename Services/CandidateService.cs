@@ -15,7 +15,7 @@ namespace five_birds_be.Services
         Task<ApiResponse<string>> UpdateCandidateAsync(int id, CandidateRequest request);
         Task<ApiResponse<string>> DeleteCandidateAsync(int id);
         Task<ApiResponse<string>> SendEmailCandidate(int id, EmailRequest body);
-        Task<ApiResponse<List<CandidateResponse>>> GetCandidatesPage(int pageNumber, int pageSize, StatusEmail? statusEmail, int? CandidatePositionId);
+        Task<ApiResponse<List<CandidateResponse>>> GetCandidatesPage(int pageNumber, int pageSize, StatusEmail? statusEmail, int? CandidatePositionId, DateTime? startDate, DateTime? endDate);
 
     }
 
@@ -167,7 +167,7 @@ namespace five_birds_be.Services
             return ApiResponse<List<CandidateResponse>>.Success(200, candidates);
         }
 
-        public async Task<ApiResponse<List<CandidateResponse>>> GetCandidatesPage(int pageNumber, int pageSize, StatusEmail? statusEmail, int? CandidatePositionId)
+        public async Task<ApiResponse<List<CandidateResponse>>> GetCandidatesPage(int pageNumber, int pageSize, StatusEmail? statusEmail, int? CandidatePositionId, DateTime? startDate, DateTime? endDate)
         {
             Console.WriteLine("sdasdfasdf" + statusEmail);
 
@@ -185,6 +185,20 @@ namespace five_birds_be.Services
             {
                 query = query.Where(c => c.CandidatePosition.Id == CandidatePositionId.Value);
             }
+
+            if (startDate.HasValue && endDate.HasValue)
+            {
+                query = query.Where(c => c.CreatedAt >= startDate.Value && c.CreatedAt <= endDate.Value);
+            }
+            else if (startDate.HasValue)
+            {
+                query = query.Where(c => c.CreatedAt >= startDate.Value);
+            }
+            else if (endDate.HasValue)
+            {
+                query = query.Where(c => c.CreatedAt <= endDate.Value);
+            }
+
 
             var candidates = await query
                 .Skip((pageNumber - 1) * pageSize)
