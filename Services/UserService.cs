@@ -34,7 +34,17 @@ namespace five_birds_be.Services
             if (pageNumber < 1) pageNumber = 1;
 
             return await _dataContext.User
-                .Where(user => user.Role != Role.ROLE_ADMIN)
+                .Where(user => user.Role == Role.ROLE_CANDIDATE)
+                .Skip((pageNumber - 1) * 10)
+                .Take(pageSize)
+                .ToListAsync();
+        }
+        public async Task<List<User>> GetPagedAdmin(int pageNumber, int pageSize)
+        {
+            if (pageNumber < 1) pageNumber = 1;
+
+            return await _dataContext.User
+                .Where(user => user.Role == Role.ROLE_ADMIN)
                 .Skip((pageNumber - 1) * 10)
                 .Take(pageSize)
                 .ToListAsync();
@@ -60,7 +70,7 @@ namespace five_birds_be.Services
             await _dataContext.User.AddAsync(newUserDTO);
             await _dataContext.SaveChangesAsync();
 
-            return ApiResponse<string>.Success(200, null, "Account created successfully and confirmation email sent.");
+            return ApiResponse<string>.Success(200, null, "Account created successfully");
         }
         public async Task<ApiResponse<string>> RegisterAdmin(UserRegister userDTO)
         {
@@ -83,26 +93,25 @@ namespace five_birds_be.Services
             await _dataContext.User.AddAsync(newUserDTO);
             await _dataContext.SaveChangesAsync();
 
-            return ApiResponse<string>.Success(200, null, "Account created successfully and confirmation email sent.");
+            return ApiResponse<string>.Success(200, null, "Admin created successfull");
         }
 
-        public async Task<ApiResponse<UserResponseDTO>> UpdateUser(UserDTO userDTO)
+        public async Task<ApiResponse<UserResponseDTO>> UpdateUser(int userId, UserDTO userDTO)
         {
-            var userId = _jservice.GetUserIdFromHttpContext();
             var user = await _dataContext.User.FindAsync(userId);
 
             if (user == null) return ApiResponse<UserResponseDTO>.Failure(404, " UserId NotFound");
 
-            if (!BCrypt.Net.BCrypt.Verify(userDTO.Password, user.Password))
-                return ApiResponse<UserResponseDTO>.Failure(400, "Incorrect password");
+            // if (!BCrypt.Net.BCrypt.Verify(userDTO.Password, user.Password))
+            //     return ApiResponse<UserResponseDTO>.Failure(400, "Incorrect password");
 
-            if (!string.IsNullOrEmpty(userDTO.NewPassword))
-            {
-                if (userDTO.NewPassword.Length < 6)
-                    return ApiResponse<UserResponseDTO>.Failure(400, "Password must be at least 6 characters long");
+            // if (!string.IsNullOrEmpty(userDTO.NewPassword))
+            // {
+            //     if (userDTO.NewPassword.Length < 6)
+            //         return ApiResponse<UserResponseDTO>.Failure(400, "Password must be at least 6 characters long");
 
-                user.Password = BCrypt.Net.BCrypt.HashPassword(userDTO.NewPassword);
-            }
+            //     user.Password = BCrypt.Net.BCrypt.HashPassword(userDTO.NewPassword);
+            // }
 
             user.UserName = userDTO.UserName;
             user.Email = userDTO.Email;
@@ -174,11 +183,8 @@ namespace five_birds_be.Services
             _httpContextAccessor.HttpContext.Response.Cookies.Append("token", token, cookieOptions);
         }
 
-        public async Task<ApiResponse<UserResponseDTO>> GetUserById()
+        public async Task<ApiResponse<UserResponseDTO>> GetUserById(int userId)
         {
-            var userId = _jservice.GetUserIdFromHttpContext();
-            if (userId == null) return ApiResponse<UserResponseDTO>.Failure(404, "UserId not found");
-
             var user = await _dataContext.User.FirstOrDefaultAsync(u => u.UserId == userId);
             if (user == null) return ApiResponse<UserResponseDTO>.Failure(404, "User null");
 
@@ -191,6 +197,15 @@ namespace five_birds_be.Services
             };
 
             return ApiResponse<UserResponseDTO>.Success(200, userResponseDTO, "get UserId success");
+        }
+
+        public async Task<ApiResponse<string>> DeleteUser(int id)
+        {
+            var user = await _dataContext.User.FirstOrDefaultAsync(u => u.UserId == id);
+            if (user == null) return ApiResponse<string>.Failure(404, "id user exam not found");
+            _dataContext.Remove(user);
+            await _dataContext.SaveChangesAsync();
+            return ApiResponse<string>.Success(200, "delete user success");
         }
 
     }

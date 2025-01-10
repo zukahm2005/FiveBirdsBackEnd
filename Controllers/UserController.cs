@@ -32,6 +32,16 @@ namespace five_birds_be.Controllers
 
             return Ok(ApiResponse<List<User>>.Success(200, user, "user retrieved successfully"));
         }
+        [HttpGet("get-admin/all")]
+        [Authorize(Roles = "ROLE_ADMIN")]
+        public async Task<IActionResult> GetAllAdmin(int pageNumber, int pageSize)
+        {
+            var admin = await _userService.GetPagedAdmin(pageNumber, pageSize);
+            if (admin == null || !admin.Any())
+                return NotFound(ApiResponse<List<User>>.Failure(404, "No user found"));
+
+            return Ok(ApiResponse<List<User>>.Success(200, admin, "admin retrieved successfully"));
+        }
 
 
         [HttpPost("register")]
@@ -56,11 +66,11 @@ namespace five_birds_be.Controllers
             return Ok(postUser);
         }
 
-        [HttpPut("update")]
+        [HttpPut("update/{id}")]
         [Authorize(Roles = "ROLE_ADMIN")]
-        public async Task<IActionResult> UpdateUser([FromBody] UserDTO user)
+        public async Task<IActionResult> UpdateUser(int id, [FromBody] UserDTO user)
         {
-            var data = await _userService.UpdateUser(user);
+            var data = await _userService.UpdateUser(id, user);
 
             if (data.ErrorCode == 404) return NotFound(data);
 
@@ -116,13 +126,22 @@ namespace five_birds_be.Controllers
             }
         }
 
-        [HttpGet]
+        [HttpGet("{id}")]
         [Authorize(Roles = "ROLE_ADMIN, ROLE_CANDIDATE")]
-        public async Task<IActionResult> GetUser()
+        public async Task<IActionResult> GetUser(int id)
         {
-            var data = await _userService.GetUserById();
+            var data = await _userService.GetUserById(id);
             if (data.ErrorCode == 404) BadRequest(data);
             if (data.ErrorCode == 400) BadRequest(data);
+            return Ok(data);
+        }
+
+        [HttpDelete("delete/{id}")]
+        [Authorize(Roles = "ROLE_ADMIN")]
+        public async Task<ActionResult> Delete(int id)
+        {
+            var data = await _userService.DeleteUser(id);
+            if (data.ErrorCode == 404) return NotFound(data);
             return Ok(data);
         }
 
