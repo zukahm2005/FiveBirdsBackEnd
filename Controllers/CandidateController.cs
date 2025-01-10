@@ -41,9 +41,9 @@ namespace five_birds_be.Controllers
 
         [HttpGet("get/all")]
         [Authorize(Roles = "ROLE_ADMIN")]
-        public async Task<IActionResult> GetCandidatesPage(int pageNumber, int pageSize, StatusEmail? statusEmail, int? CandidatePositionId)
+        public async Task<IActionResult> GetCandidatesPage(int pageNumber, int pageSize, StatusEmail? statusEmail, int? CandidatePositionId,  DateTime? startDate, DateTime? endDate)
         {
-            var response = await _candidateService.GetCandidatesPage(pageNumber, pageSize, statusEmail, CandidatePositionId);
+            var response = await _candidateService.GetCandidatesPage(pageNumber, pageSize, statusEmail, CandidatePositionId, startDate, endDate);
             return Ok(response);
         }
 
