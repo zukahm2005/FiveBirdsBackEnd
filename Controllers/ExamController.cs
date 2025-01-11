@@ -42,6 +42,14 @@ namespace five_birds_be.Controllers
             if (exam.ErrorCode == 404) return NotFound(exam);
             return Ok(exam);
         }
+        [HttpGet("get-position/{name}")]
+        [Authorize(Roles = "ROLE_ADMIN, ROLE_CANDIDATE")]
+        public async Task<IActionResult> getByNamePosition(string name)
+        {
+            var exam = await _examService.getExamByNamePosition(name);
+            if (exam.ErrorCode == 404) return NotFound(exam);
+            return Ok(exam);
+        }
 
         [HttpPut("update/{id}")]
         [Authorize(Roles = "ROLE_ADMIN")]
