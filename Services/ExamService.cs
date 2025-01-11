@@ -134,19 +134,19 @@ namespace five_birds_be.Servi
 
             return ApiResponse<ExamResponse>.Success(200, examResponse, "find success");
         }
-         public async Task<ApiResponse<ExamResponse>> getExamByNamePosition(string namePosition)
+        public async Task<ApiResponse<List<ExamResponse>>> GetExamsByNamePosition(string namePosition)
         {
-            var exam = await _dataContext.Exam
+            var exams = await _dataContext.Exam
                 .Include(exam => exam.CandidatePosition)
                 .Include(exam => exam.Question)
                 .ThenInclude(question => question.Answers)
-                .Include(e => e.CandidatePosition)
-                .FirstOrDefaultAsync(c => c.CandidatePosition.Name == namePosition);
+                .Where(c => c.CandidatePosition.Name == namePosition)
+                .ToListAsync();
 
-            if (exam == null)
-                return ApiResponse<ExamResponse>.Failure(404, "id exam not found");
+            if (!exams.Any())
+                return ApiResponse<List<ExamResponse>>.Failure(404, "No exams found for the specified name position");
 
-            var examResponse = new ExamResponse
+            var examResponses = exams.Select(exam => new ExamResponse
             {
                 Id = exam.Id,
                 Title = exam.Title,
@@ -157,28 +157,11 @@ namespace five_birds_be.Servi
                     Id = exam.CandidatePosition.Id,
                     Name = exam.CandidatePosition.Name
                 },
-                Question = exam.Question.Select(q => new QuestionResponse
-                {
-                    Id = q.Id,
-                    ExamId = q.ExamId,
-                    QuestionExam = q.QuestionExam,
-                    Point = q.Point,
-                    Answers = q.Answers.Select(a => new AnswerResponse
-                    {
-                        Id = a.Id,
-                        QuestionId = a.QuestionId,
-                        QuestionExam = a.Question.QuestionExam,
-                        Answer1 = a.Answer1,
-                        Answer2 = a.Answer2,
-                        Answer3 = a.Answer3,
-                        Answer4 = a.Answer4,
-                        CorrectAnswer = a.CorrectAnswer
-                    }).ToList()
-                }).ToList()
-            };
+            }).ToList();
 
-            return ApiResponse<ExamResponse>.Success(200, examResponse, "find success");
+            return ApiResponse<List<ExamResponse>>.Success(200, examResponses, "Exams retrieved successfully");
         }
+
 
         public async Task<ApiResponse<ExamResponse>> updateExam(int Id, ExamDTO examDTO)
         {

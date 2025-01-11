@@ -46,7 +46,7 @@ namespace five_birds_be.Controllers
         [Authorize(Roles = "ROLE_ADMIN, ROLE_CANDIDATE")]
         public async Task<IActionResult> getByNamePosition(string name)
         {
-            var exam = await _examService.getExamByNamePosition(name);
+            var exam = await _examService.GetExamsByNamePosition(name);
             if (exam.ErrorCode == 404) return NotFound(exam);
             return Ok(exam);
         }
