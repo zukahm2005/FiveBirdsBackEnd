@@ -12,8 +12,10 @@ namespace five_birds_be.Services
     public class CandidateTestService
     {
         public DataContext _dataContext;
-        public CandidateTestService(DataContext dataContext)
+        public EmailService _emailService;
+        public CandidateTestService(DataContext dataContext, EmailService emailService)
         {
+            _emailService = emailService;
             _dataContext = dataContext;
         }
 
@@ -80,6 +82,7 @@ namespace five_birds_be.Services
                 IsPast = newCandidateTest.IsPast
 
             };
+            await _emailService.SendEmailResult(dataUser.Email, dataUser.UserName, "Candidate Results", IsPast);
 
             return ApiResponse<CandidateTestRespone>.Success(200, newCandidateTestResponse, "create success");
         }
@@ -169,7 +172,7 @@ namespace five_birds_be.Services
                     .Include(u => u.User)
                     .Include(u => u.Exam)
                     .Skip((pageNumber - 1) * pageSize)
-                    .Take(pageSize) 
+                    .Take(pageSize)
                     .ToListAsync();
 
                 return ApiResponse<object>.Success(200, data, "Get all success");
@@ -179,7 +182,7 @@ namespace five_birds_be.Services
                 return ApiResponse<object>.Failure(500, $"Error: {ex.Message}");
             }
         }
-         public async Task<ApiResponse<object>> Get()
+        public async Task<ApiResponse<object>> Get()
         {
             try
             {

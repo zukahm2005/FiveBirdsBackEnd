@@ -55,6 +55,7 @@ public class EmailService
                                         </tr>
                                         <tr>
                                             <td style='padding: 20px; background-color: #ffffff;'>
+                                                <p style='font-size: 16px; margin: 10px 0;'>Hello candidate {body.email}</p>
                                                 <p style='font-size: 16px; margin: 10px 0;'><strong>Exam:</strong> {body.examTitle}</p>
                                                 <p style='font-size: 16px; margin: 10px 0;'><strong>Time:</strong> {body.selectedTime}</p>
                                                 <p style='font-size: 16px; margin: 10px 0;'><strong>Date:</strong> {body.selectedDate}</p>
@@ -68,7 +69,7 @@ public class EmailService
                                             <p style='font-size: 16px; margin: 10px 0;'><strong>Password:</strong> {body.Password}</p>
         
                                             <br/>
-                                            <p>Click link: <a href='http://46.202.178.139:5173/login'> Login Exam </a> </p>
+                                            <p>Click link: <a href='http://46.202.178.139:5173/candidate-login'> Login Exam </a> </p>
                                          </td>
                                         </tr>
                                         <tr>
@@ -91,6 +92,126 @@ public class EmailService
             IsBodyHtml = true,
         };
 
+
         await smtpClient.SendMailAsync(mailMessage);
     }
+  public async Task SendEmailResult(string toEmail, string name, string subject, bool testPassed)
+{
+    var fromEmail = "selingbook@gmail.com";
+    var fromPassword = "fsudhvspvdzlvhko";
+
+    var smtpClient = new SmtpClient("smtp.gmail.com")
+    {
+        Port = 587,
+        Credentials = new NetworkCredential(fromEmail, fromPassword),
+        EnableSsl = true,
+    };
+
+    var cssStyles = @"
+    <style>
+        body { font-family: 'Arial', sans-serif; background-color: #f4f4f9; color: #333; margin: 0; padding: 0; }
+        .container { width: 100%; max-width: 600px; margin: 0 auto; background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); }
+        .header { background-color: #4CAF50; color: white; padding: 20px; border-radius: 8px 8px 0 0; text-align: center; }
+        .content { margin-top: 20px; padding: 20px; font-size: 16px; line-height: 1.6; }
+        .footer { margin-top: 30px; text-align: center; font-size: 12px; color: #777; padding: 10px 0; }
+        .btn { display: inline-block; padding: 10px 20px; font-size: 16px; color: #fff; background-color: #4CAF50; border-radius: 5px; text-decoration: none; }
+        .btn:hover { background-color: #45a049; }
+        .result { font-weight: bold; font-size: 18px; color: #333; }
+        .passed { color: green; }
+        .failed { color: red; }
+    </style>";
+
+    string resultMessage = testPassed ? "<span class='result passed'>You passed the test!</span>" : "<span class='result failed'>You failed the test.</span>";
+
+    var emailBody = $@"
+    <html>
+        <head>{cssStyles}</head>
+        <body>
+            <div class='container'>
+                <div class='header'>
+                    <h2>Exam Results Announcement</h2>
+                </div>
+                <div class='content'>
+                    <p>Dear {name},</p>
+                    <p>Your exam result is:</p>
+                    <p>{resultMessage}</p>
+                    <p>Thank you for taking the test. We encourage you to continue improving your skills!</p>
+                </div>
+                <div class='footer'>
+                    <p>Sent from SelingBook</p>
+                    <p>&copy; {DateTime.Now.Year} SelingBook. All rights reserved.</p>
+                </div>
+            </div>
+        </body>
+    </html>";
+
+    var mailMessage = new MailMessage(fromEmail, toEmail)
+    {
+        Subject = subject,
+        Body = emailBody,
+        IsBodyHtml = true,
+    };
+
+    await smtpClient.SendMailAsync(mailMessage);
+}
+
+public async Task SendInterviewSchedule(string toEmail, string subject, string interviewDate)
+{
+    var fromEmail = "selingbook@gmail.com";
+    var fromPassword = "fsudhvspvdzlvhko";
+
+    var smtpClient = new SmtpClient("smtp.gmail.com")
+    {
+        Port = 587,
+        Credentials = new NetworkCredential(fromEmail, fromPassword),
+        EnableSsl = true,
+    };
+
+    var cssStyles = @"
+    <style>
+        body { font-family: 'Arial', sans-serif; background-color: #f4f4f9; color: #333; margin: 0; padding: 0; }
+        .container { width: 100%; max-width: 600px; margin: 0 auto; background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); }
+        .header { background-color: #4CAF50; color: white; padding: 20px; border-radius: 8px 8px 0 0; text-align: center; }
+        .content { margin-top: 20px; padding: 20px; font-size: 16px; line-height: 1.6; }
+        .footer { margin-top: 30px; text-align: center; font-size: 12px; color: #777; padding: 10px 0; }
+        .btn { display: inline-block; padding: 10px 20px; font-size: 16px; color: #fff; background-color: #4CAF50; border-radius: 5px; text-decoration: none; }
+        .btn:hover { background-color: #45a049; }
+    </style>";
+
+
+    var emailBody = $@"
+    <html>
+        <head>{cssStyles}</head>
+        <body>
+            <div class='container'>
+                <div class='header'>
+                    <h2>Interview Schedule</h2>
+                </div>
+                <div class='content'>
+                    <p>Dear Candidate,</p>
+                    <p>We are pleased to inform you that your interview has been scheduled.</p>
+                    <p><strong>Interview Date:</strong> {interviewDate}</p>
+                    <p><strong>Interview Location:</strong> 8a Ton That Thuyet, Nam Tu Liem, HN</p>
+                    <p>Please make sure to arrive at least 15 minutes early and bring any necessary documents with you.</p>
+                    <p>We look forward to meeting you!</p>
+                </div>
+                <div class='footer'>
+                    <p>Sent from SelingBook</p>
+                    <p>&copy; {DateTime.Now.Year} SelingBook. All rights reserved.</p>
+                </div>
+            </div>
+        </body>
+    </html>";
+
+    var mailMessage = new MailMessage(fromEmail, toEmail)
+    {
+        Subject = subject,
+        Body = emailBody,
+        IsBodyHtml = true,
+    };
+
+    await smtpClient.SendMailAsync(mailMessage);
+}
+
+
 }
