@@ -95,7 +95,7 @@ public class EmailService
 
         await smtpClient.SendMailAsync(mailMessage);
     }
-  public async Task SendEmailResult(string toEmail, string name, string subject, bool testPassed)
+  public async Task SendEmailResult(string toEmail, string name, string subject, bool testPassed, int newPoint)
 {
     var fromEmail = "selingbook@gmail.com";
     var fromPassword = "fsudhvspvdzlvhko";
@@ -133,7 +133,7 @@ public class EmailService
                 </div>
                 <div class='content'>
                     <p>Dear {name},</p>
-                    <p>Your exam result is:</p>
+                    <p>Your exam result is: {newPoint}</p>
                     <p>{resultMessage}</p>
                     <p>Thank you for taking the test. We encourage you to continue improving your skills!</p>
                 </div>

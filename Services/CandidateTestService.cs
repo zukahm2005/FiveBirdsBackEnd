@@ -82,7 +82,7 @@ namespace five_birds_be.Services
                 IsPast = newCandidateTest.IsPast
 
             };
-            await _emailService.SendEmailResult(dataUser.Email, dataUser.UserName, "Candidate Results", IsPast);
+            await _emailService.SendEmailResult(dataUser.Email, dataUser.UserName, "Candidate Results", IsPast , newPoint);
 
             return ApiResponse<CandidateTestRespone>.Success(200, newCandidateTestResponse, "create success");
         }
