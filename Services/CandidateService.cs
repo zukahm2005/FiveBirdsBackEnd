@@ -16,7 +16,7 @@ namespace five_birds_be.Services
         Task<ApiResponse<string>> DeleteCandidateAsync(int id);
         Task<ApiResponse<string>> SendEmailCandidate(int id, EmailRequest body);
         Task<ApiResponse<List<CandidateResponse>>> GetCandidatesPage(int pageNumber, int pageSize, StatusEmail? statusEmail, int? CandidatePositionId, DateTime? startDate, DateTime? endDate);
-        Task<ApiResponse<string>> SendEmailInterviewSchedule(int CandidateId, string interviewDate);
+        Task<ApiResponse<string>> SendEmailInterviewSchedule(int CandidateId, EmailRequest2 emailRequest);
     }
 
     public class CandidateService : ICandidateService
@@ -362,14 +362,14 @@ namespace five_birds_be.Services
             return ApiResponse<string>.Success(200, "Gửi email thành công");
         }
 
-        public async Task<ApiResponse<string>> SendEmailInterviewSchedule(int candidateID, string interviewDate)
+        public async Task<ApiResponse<string>> SendEmailInterviewSchedule(int candidateID, EmailRequest2 emailRequest2)
         {
             var data = await _context.Candidates.FirstOrDefaultAsync(c => c.Id == candidateID);
             if (data == null) return ApiResponse<string>.Failure(404, "candidate id not found");
             string name = data.FullName;
             string email = data.Email;
             string subject = "Interview Schedule Notification";
-            await _emailService.SendInterviewSchedule( name ,email, subject, interviewDate);
+            await _emailService.SendInterviewSchedule( name ,email, subject, emailRequest2);
             return ApiResponse<string>.Success(200, "send email successfully");
         }
 
