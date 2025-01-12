@@ -344,6 +344,7 @@ namespace five_birds_be.Services
 
             var body = new EmailResponse
             {
+                name = candidate.FullName,
                 email = candidate.Email,
                 examTitle = emailRequest.examTitle,
                 comment = emailRequest.comment,

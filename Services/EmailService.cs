@@ -55,7 +55,7 @@ public class EmailService
                                         </tr>
                                         <tr>
                                             <td style='padding: 20px; background-color: #ffffff;'>
-                                                <p style='font-size: 16px; margin: 10px 0;'>Hello candidate {body.email}</p>
+                                                <p style='font-size: 16px; margin: 10px 0;'>Hello {body.name}</p>
                                                 <p style='font-size: 16px; margin: 10px 0;'><strong>Exam:</strong> {body.examTitle}</p>
                                                 <p style='font-size: 16px; margin: 10px 0;'><strong>Time:</strong> {body.selectedTime}</p>
                                                 <p style='font-size: 16px; margin: 10px 0;'><strong>Date:</strong> {body.selectedDate}</p>
