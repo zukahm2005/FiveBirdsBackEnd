@@ -155,7 +155,7 @@ public class EmailService
     await smtpClient.SendMailAsync(mailMessage);
 }
 
-public async Task SendInterviewSchedule(string toEmail, string subject, string interviewDate)
+public async Task SendInterviewSchedule(string name, string toEmail, string subject, string interviewDate)
 {
     var fromEmail = "selingbook@gmail.com";
     var fromPassword = "fsudhvspvdzlvhko";
@@ -188,7 +188,7 @@ public async Task SendInterviewSchedule(string toEmail, string subject, string i
                     <h2>Interview Schedule</h2>
                 </div>
                 <div class='content'>
-                    <p>Dear Candidate,</p>
+                    <p>Dear {name},</p>
                     <p>We are pleased to inform you that your interview has been scheduled.</p>
                     <p><strong>Interview Date:</strong> {interviewDate}</p>
                     <p><strong>Interview Location:</strong> 8a Ton That Thuyet, Nam Tu Liem, HN</p>

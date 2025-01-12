@@ -107,9 +107,10 @@ namespace five_birds_be.Controllers
 
             return Ok(response);
         }
-        [HttpPost("send/email/interview")]
-        public async Task<IActionResult> SendEmailInterview(string email, string interviewDate){
-            var response = await _candidateService.SendEmailInterviewSchedule(email, interviewDate);
+        [HttpPost("send/email/interview/{id}")]
+        public async Task<IActionResult> SendEmailInterview(int id, string interviewDate){
+            var response = await _candidateService.SendEmailInterviewSchedule(id, interviewDate);
+            if (response.ErrorCode == 404) return NotFound(response);
             return Ok(response);
         }
     }
