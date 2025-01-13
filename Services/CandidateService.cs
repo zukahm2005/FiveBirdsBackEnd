@@ -136,6 +136,7 @@ namespace five_birds_be.Services
         {
             var candidates = await _context.Candidates
                .Include(c => c.CandidatePosition)
+                .OrderByDescending(c => c.CreatedAt)
                .Include(c => c.User)
                .Select(c => new CandidateResponse
                {
@@ -199,6 +200,7 @@ namespace five_birds_be.Services
                 query = query.Where(c => c.CreatedAt <= endDate.Value);
             }
 
+            query = query.OrderByDescending(c => c.CreatedAt);
 
             var candidates = await query
                 .Skip((pageNumber - 1) * pageSize)
@@ -370,7 +372,7 @@ namespace five_birds_be.Services
             string name = data.FullName;
             string email = data.Email;
             string subject = "Interview Schedule Notification";
-            await _emailService.SendInterviewSchedule( name ,email, subject, emailRequest2);
+            await _emailService.SendInterviewSchedule(name, email, subject, emailRequest2);
             return ApiResponse<string>.Success(200, "send email successfully");
         }
 
