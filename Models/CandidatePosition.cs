@@ -6,8 +6,8 @@ namespace five_birds_be.Models
 
         public string Name { get; set; }
 
-         public int? CandidateId { get; set; }
-        public Candidate Candidate { get; set; }
+        public List<Candidate> Candidates { get; set; } = new List<Candidate>();
+
         public List<Exam> Exams { get; set; } = new List<Exam>();
     }
 }

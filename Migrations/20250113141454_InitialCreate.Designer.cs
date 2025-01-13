@@ -11,7 +11,7 @@ using five_birds_be.Data;
 namespace five_birds_be.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20250108024604_InitialCreate")]
+    [Migration("20250113141454_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -73,6 +73,9 @@ namespace five_birds_be.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<int>("CandidatePositionId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
 
@@ -100,10 +103,15 @@ namespace five_birds_be.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<int>("StatusEmail")
+                        .HasColumnType("int");
+
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CandidatePositionId");
 
                     b.HasIndex("UserId")
                         .IsUnique();
@@ -117,17 +125,11 @@ namespace five_birds_be.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<int>("CandidateId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("longtext");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("CandidateId")
-                        .IsUnique();
 
                     b.ToTable("CandidatePositions");
                 });
@@ -353,24 +355,21 @@ namespace five_birds_be.Migrations
 
             modelBuilder.Entity("five_birds_be.Models.Candidate", b =>
                 {
+                    b.HasOne("five_birds_be.Models.CandidatePosition", "CandidatePosition")
+                        .WithMany("Candidates")
+                        .HasForeignKey("CandidatePositionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("five_birds_be.Models.User", "User")
                         .WithOne("Candidate")
                         .HasForeignKey("five_birds_be.Models.Candidate", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("CandidatePosition");
+
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("five_birds_be.Models.CandidatePosition", b =>
-                {
-                    b.HasOne("five_birds_be.Models.Candidate", "Candidate")
-                        .WithOne("CandidatePosition")
-                        .HasForeignKey("five_birds_be.Models.CandidatePosition", "CandidateId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Candidate");
                 });
 
             modelBuilder.Entity("five_birds_be.Models.CandidateTest", b =>
@@ -397,7 +396,7 @@ namespace five_birds_be.Migrations
                     b.HasOne("five_birds_be.Models.CandidatePosition", "CandidatePosition")
                         .WithMany("Exams")
                         .HasForeignKey("CandidatePositionId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("CandidatePosition");
@@ -472,14 +471,10 @@ namespace five_birds_be.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("five_birds_be.Models.Candidate", b =>
-                {
-                    b.Navigation("CandidatePosition")
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("five_birds_be.Models.CandidatePosition", b =>
                 {
+                    b.Navigation("Candidates");
+
                     b.Navigation("Exams");
                 });
 

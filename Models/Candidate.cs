@@ -1,6 +1,7 @@
 namespace five_birds_be.Models
 {
-    public enum StatusEmail{
+    public enum StatusEmail
+    {
         PENDING,
         SUCCESS
     }
@@ -14,10 +15,12 @@ namespace five_birds_be.Models
         public string Education { get; set; }
         public string Experience { get; set; }
         public string CvFilePath { get; set; }
-        public StatusEmail StatusEmail{ get; set; } = StatusEmail.PENDING;
+        public StatusEmail StatusEmail { get; set; } = StatusEmail.PENDING;
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public int UserId { get; set; }
         public User User { get; set; }
-         public CandidatePosition CandidatePosition { get; set; }
+
+        public int CandidatePositionId { get; set; }
+        public CandidatePosition CandidatePosition { get; set; }
     }
 }

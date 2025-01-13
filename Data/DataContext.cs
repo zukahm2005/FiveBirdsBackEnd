@@ -53,17 +53,12 @@ namespace five_birds_be.Data
                 .HasForeignKey(c => c.ExamId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            builder.Entity<Candidate>()
-                .HasOne(c => c.CandidatePosition)
-                .WithOne(cp => cp.Candidate)
-                .HasForeignKey<CandidatePosition>(cp => cp.CandidateId)
-                .OnDelete(DeleteBehavior.Cascade);
 
             builder.Entity<CandidatePosition>()
-                .HasMany(cp => cp.Exams)
-                .WithOne(e => e.CandidatePosition)
-                .HasForeignKey(e => e.CandidatePositionId)
-                .OnDelete(DeleteBehavior.Restrict);
+        .HasMany(cp => cp.Candidates)
+        .WithOne(c => c.CandidatePosition)
+        .HasForeignKey(c => c.CandidatePositionId)
+        .OnDelete(DeleteBehavior.Restrict);
 
         }
 
