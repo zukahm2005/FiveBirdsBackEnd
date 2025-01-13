@@ -367,6 +367,8 @@ namespace five_birds_be.Services
             var user = await _context.User.FirstOrDefaultAsync(u => u.UserId == candidate.UserId);
             if (user == null) return ApiResponse<string>.Failure(404, "không tìm thấy Id người dùng");
 
+            if (candidate.StatusEmail == StatusEmail.SUCCESS) return  ApiResponse<string>.Failure(400, "đã gửi email cho ứng viên");
+
             candidate.StatusEmail = StatusEmail.SUCCESS;
             await _context.SaveChangesAsync();
 

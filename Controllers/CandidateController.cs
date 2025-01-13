@@ -99,12 +99,8 @@ namespace five_birds_be.Controllers
                 return BadRequest(ApiResponse<string>.Failure(400, "Dữ liệu không hợp lệ."));
 
             var response = await _candidateService.SendEmailCandidate(id, emailRequest);
-            if (response.ErrorCode == 404)
-                return NotFound(response);
-
-            if (response.ErrorCode != 200)
-                return StatusCode(500, response);
-
+            if (response.ErrorCode == 404)  return NotFound(response);
+            if (response.ErrorCode == 400)  return BadRequest(response);
             return Ok(response);
         }
         [HttpPost("send/email/interview/{id}")]
