@@ -135,38 +135,63 @@ namespace five_birds_be.Services
         public async Task<ApiResponse<List<CandidateResponse>>> GetCandidatesAsync()
         {
             var candidates = await _context.Candidates
-               .Include(c => c.CandidatePosition)
+                .Include(c => c.CandidatePosition)
+                .Include(c => c.User)
                 .OrderByDescending(c => c.CreatedAt)
-               .Include(c => c.User)
-               .Select(c => new CandidateResponse
-               {
-                   Id = c.Id,
-                   FullName = c.FullName,
-                   Email = c.Email,
-                   Phone = c.Phone,
-                   Birthday = c.Birthday,
-                   Education = c.Education,
-                   Experience = c.Experience,
-                   CvFilePath = c.CvFilePath,
-                   StatusEmail = c.StatusEmail,
-                   CreatedAt = c.CreatedAt,
-                   CandidatePosition = c.CandidatePosition != null ? new CandidatePositionResponse
-                   {
-                       Id = c.CandidatePosition.Id,
-                       Name = c.CandidatePosition.Name
-                   } : null,
-                   User = c.User != null ? new UserResponseDTO
-                   {
-                       UserId = c.User.UserId,
-                       UserName = c.User.UserName,
-                       Password = c.User.Password,
-                       Email = c.User.Email
-                   } : null
-               })
-       .ToListAsync();
+                .ToListAsync();
 
-            return ApiResponse<List<CandidateResponse>>.Success(200, candidates);
+            var candidateResponses = new List<CandidateResponse>();
+            foreach (var candidate in candidates)
+            {
+                var userData = candidate.User;
+                if (userData == null)
+                {
+                    return ApiResponse<List<CandidateResponse>>.Failure(404, "User not found for some candidates.");
+                }
+                var candidateTest = await _context.CandidateTests.FirstOrDefaultAsync(ct => ct.UserId == userData.UserId);
+                var isPast = candidateTest?.IsPast;
+
+                var response = new CandidateResponse
+                {
+                    Id = candidate.Id,
+                    FullName = candidate.FullName,
+                    Email = candidate.Email,
+                    Phone = candidate.Phone,
+                    Birthday = candidate.Birthday,
+                    Education = candidate.Education,
+                    Experience = candidate.Experience,
+                    CvFilePath = candidate.CvFilePath,
+                    StatusEmail = candidate.StatusEmail,
+                    CreatedAt = candidate.CreatedAt,
+                    CandidatePosition = candidate.CandidatePosition != null
+                        ? new CandidatePositionResponse
+                        {
+                            Id = candidate.CandidatePosition.Id,
+                            Name = candidate.CandidatePosition.Name
+                        }
+                        : null,
+                    User = candidate.User != null
+                        ? new UserResponseDTO
+                        {
+                            UserId = candidate.User.UserId,
+                            UserName = candidate.User.UserName,
+                            Password = candidate.User.Password,
+                            Email = candidate.User.Email
+                        }
+                        : null
+                };
+
+                if (isPast != null)
+                {
+                    response.IsPast = isPast.Value;
+                }
+
+                candidateResponses.Add(response);
+            }
+
+            return ApiResponse<List<CandidateResponse>>.Success(200, candidateResponses);
         }
+
 
         public async Task<ApiResponse<List<CandidateResponse>>> GetCandidatesPage(int pageNumber, int pageSize, StatusEmail? statusEmail, int? CandidatePositionId, DateTime? startDate, DateTime? endDate)
         {
@@ -369,9 +394,13 @@ namespace five_birds_be.Services
         {
             var data = await _context.Candidates.FirstOrDefaultAsync(c => c.Id == candidateID);
             if (data == null) return ApiResponse<string>.Failure(404, "candidate id not found");
+            if(data.IsInterview == true) return ApiResponse<string>.Success(400, "Email has been sent before");
+            data.IsInterview = true;
             string name = data.FullName;
             string email = data.Email;
             string subject = "Interview Schedule Notification";
+             _context.Candidates.Update(data);
+            await _context.SaveChangesAsync();
             await _emailService.SendInterviewSchedule(name, email, subject, emailRequest2);
             return ApiResponse<string>.Success(200, "send email successfully");
         }

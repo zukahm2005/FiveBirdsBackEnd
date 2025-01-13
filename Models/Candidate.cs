@@ -19,8 +19,8 @@ namespace five_birds_be.Models
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public int UserId { get; set; }
         public User User { get; set; }
-
         public int CandidatePositionId { get; set; }
+        public bool IsInterview { get; set; } = false;
         public CandidatePosition CandidatePosition { get; set; }
     }
 }
