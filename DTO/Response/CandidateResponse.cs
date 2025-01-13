@@ -22,6 +22,8 @@ namespace five_birds_be.DTO.Response
 
         public bool? IsPast { get; set; }
 
+        public bool IsInterview { get; set; }
+
         public DateTime CreatedAt { get; set; }
     }
 }

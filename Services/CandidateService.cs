@@ -163,6 +163,7 @@ namespace five_birds_be.Services
                     CvFilePath = candidate.CvFilePath,
                     StatusEmail = candidate.StatusEmail,
                     CreatedAt = candidate.CreatedAt,
+                    IsInterview = candidate.IsInterview,
                     CandidatePosition = candidate.CandidatePosition != null
                         ? new CandidatePositionResponse
                         {
