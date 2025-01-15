@@ -1,6 +1,6 @@
 namespace five_birds_be.Models
 {
-    public class CandidateTest
+    public class CandidateTest : DateTimes
     {
         public int Id { get; set; }
         public int UserId { get; set; }
