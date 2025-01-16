@@ -103,7 +103,8 @@ namespace five_birds_be.Migrations
                     StatusEmail = table.Column<int>(type: "int", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     UserId = table.Column<int>(type: "int", nullable: false),
-                    CandidatePositionId = table.Column<int>(type: "int", nullable: false)
+                    CandidatePositionId = table.Column<int>(type: "int", nullable: false),
+                    IsInterview = table.Column<bool>(type: "tinyint(1)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -132,7 +133,9 @@ namespace five_birds_be.Migrations
                     UserId = table.Column<int>(type: "int", nullable: false),
                     ExamId = table.Column<int>(type: "int", nullable: false),
                     Point = table.Column<int>(type: "int", nullable: false),
-                    IsPast = table.Column<bool>(type: "tinyint(1)", nullable: false)
+                    IsPast = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    Create_at = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    Update_at = table.Column<DateTime>(type: "datetime(6)", nullable: false)
                 },
                 constraints: table =>
                 {

@@ -11,8 +11,8 @@ using five_birds_be.Data;
 namespace five_birds_be.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20250115160404_UpdateModel2")]
-    partial class UpdateModel2
+    [Migration("20250116073751_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
