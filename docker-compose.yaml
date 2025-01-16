@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile
     container_name: fivebirds-backend
     ports:
-      - "5005:5005"
+      - "5050:5005"
     volumes:
       - ./wwwroot:/app/wwwroot
     environment:
